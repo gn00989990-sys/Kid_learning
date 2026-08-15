@@ -1,0 +1,10 @@
+{
+	"appId": "com.fafa.kidlearning",
+	"appName": "Kidlearning",
+	"webDir": "www",
+	"bundledWebRuntime": false,
+	"server": {
+		"androidScheme": "https"
+	},
+	"packageClassList": []
+}

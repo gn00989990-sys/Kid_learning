@@ -1,0 +1,17 @@
+{
+  "name": "kidlearning",
+  "version": "1.0.0",
+  "description": "Kid learning app",
+  "private": true,
+  "scripts": {
+    "sync": "npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor-community/text-to-speech": "^8.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0"
+  }
+}

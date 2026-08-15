@@ -1,0 +1,80 @@
+workflows:
+  ios-capacitor-workflow:
+    name: iOS Capacitor Build
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+    integrations:
+      app_store_connect: "Kid Learning"   # name of the App Store Connect integration you create in Codemagic UI
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.fafa.kidlearning
+      vars:
+        XCODE_WORKSPACE: "App.xcworkspace"
+        XCODE_SCHEME: "App"
+        BUNDLE_ID: "com.fafa.kidlearning"
+        IOS_PROJECT_DIR: "ios/App"
+      node: latest
+      xcode: latest
+      cocoapods: default
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Install Capacitor + TTS plugin
+        script: |
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+          npm install @capacitor/core @capacitor/ios @capacitor/cli @capacitor-community/text-to-speech --save-exact
+
+      - name: Sync Capacitor (generates capacitor.js + plugin JS into ios/App/App/public, updates Podfile)
+        script: |
+          npx cap sync ios
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd "$IOS_PROJECT_DIR"
+          pod install
+
+      - name: Set up code signing settings on Xcode project
+        script: |
+          cd "$IOS_PROJECT_DIR"
+          xcode-project use-profiles
+
+      - name: Ensure Xcode scheme is available
+        script: |
+          cd "$IOS_PROJECT_DIR"
+          xcodebuild -workspace "$XCODE_WORKSPACE" -list
+
+      - name: Set build number
+        script: |
+          #!/bin/sh
+          set -e
+          cd "$IOS_PROJECT_DIR"
+          echo "Setting CFBundleVersion (build number) to $PROJECT_BUILD_NUMBER"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $PROJECT_BUILD_NUMBER;/g" App.xcodeproj/project.pbxproj
+
+      - name: Build ipa for distribution
+        script: |
+          cd "$IOS_PROJECT_DIR"
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - ios/App/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      email:
+        recipients:
+          - aa5623@hotmail.com
+        notify:
+          success: true
+          failure: false
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
