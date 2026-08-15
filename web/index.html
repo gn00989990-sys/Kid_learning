@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>語言學習</title>
+    <style>
+        /* Global Styles & Background */
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url("BG/BG.png");
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+
+        /* Return buttons */
+        .return-btn {
+            position: absolute;
+            top: max(12px, env(safe-area-inset-top));
+            right: max(12px, env(safe-area-inset-right));
+            padding: 10px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff5722;
+            color: #ffffff;
+            cursor: pointer;
+            z-index: 10;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Pages styling */
+        .page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            box-sizing: border-box;
+            padding: 60px 20px 40px 20px;
+        }
+
+        .home-button, .topic-button, .dialogue-button, .audio-control-btn {
+            padding: 20px 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .home-button {
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: transform 0.12s ease;
+        }
+
+        .home-button:active {
+            animation: homeButtonShake 0.18s ease-in-out;
+        }
+
+        @keyframes homeButtonShake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-1px); }
+            100% { transform: translateX(0); }
+        }
+
+        .home-button img {
+            display: block;
+            width: min(240px, 80vw);
+            max-width: 240px;
+            height: auto;
+            pointer-events: none;
+        }
+
+        .home-button:hover,
+        .home-button:focus,
+        .home-button:active {
+            transform: none;
+            background: transparent;
+            outline: none;
+            box-shadow: none;
+            filter: none;
+        }
+
+        .audio-control-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        #stop-btn { background-color: #f44336; }
+
+
+        #home-page .home-subtitle {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .home-title-image {
+            width: min(240px, 74vw);
+            max-width: 240px;
+            height: auto;
+            margin-bottom: 2px;
+        }
+
+        .home-subtitle-image {
+            width: min(300px, 84vw);
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 8px;
+        }
+
+        .page-header-image {
+            width: min(320px, 86vw);
+            max-width: 320px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        /* ============= 小測驗模式頁 - 可愛小提示徽章 ============= */
+        .quiz-mode-intro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #fff6da, #ffe6b3);
+            border: 2px dashed #f5a742;
+            border-radius: 999px;
+            padding: 10px 22px;
+            margin: 2px 0 22px 0;
+            max-width: 90vw;
+            box-shadow: 0 6px 14px rgba(230, 126, 34, 0.18);
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #b3690f;
+            line-height: 1.5;
+            text-align: center;
+            animation: quizIntroPop 0.4s ease;
+        }
+        .quiz-mode-intro-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        @keyframes quizIntroPop {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ============= 小測驗 - 模式選擇卡 (與 vocab-item 卡片風格一致) ============= */
+        .quiz-mode-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 520px;
+            margin-top: 20px;
+        }
+        .quiz-mode-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 16px;
+            padding: 24px 20px;
+            width: 190px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+        .quiz-mode-card:hover { transform: translateY(-5px); }
+        .quiz-mode-emoji { font-size: 48px; margin-bottom: 10px; line-height: 1; }
+        .quiz-mode-label { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 6px; }
+        .quiz-mode-sub { font-size: 13px; color: #888; }
+
+        .quiz-audio-replay-btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 50px;
+            background-color: #3498db;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 0 14px 0;
+        }
+
+        .quiz-launch-btn {
+            padding: 14px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5253);
+            color: #fff;
+            cursor: pointer;
+            margin: 6px 0 20px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            font-weight: 700;
+        }
+        .quiz-launch-btn:active { transform: scale(0.97); }
+
+        /* Grid for 20 Vocab Items */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .vocab-item {
+            background: rgba(255, 255, 255, 0.96);
+            padding: 22px 18px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .vocab-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .vocab-item p { margin: 4px 0; }
+
+        /* Prettier Speak Button Group inside Vocab Card */
+        .speak-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .vocab-speak-btn {
+            padding: 8px 14px;
+            color: white;
+            border: none;
+            border-radius: 50px; /* Fully Rounded / Capsule Shape */
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .vocab-speak-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+        .vocab-speak-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Refined colors for buttons */
+        .btn-all { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #333 !important; }
+        .btn-en { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .btn-pnh { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .btn-canton { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+        .dialogue-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 20px;
+            line-height: 1.8;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            max-height: 42vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            box-sizing: border-box;
+        }
+
+        /* Wrapper that holds the picture + script together so the picture
+           stays put while the script area scrolls on its own */
+        .dialogue-content-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .dialogue-detail-img {
+            display: none;
+            max-width: 520px;
+            width: 95%;
+            max-height: 30vh;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+            margin-bottom: 18px;
+            position: sticky;
+            top: 6px;
+            flex-shrink: 0;
+        }
+
+        /* ===================== DIALOGUE TOPIC PICTURE CARDS ===================== */
+        #dialogue-topics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 18px;
+            max-width: 960px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .dialogue-topic-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 18px;
+            padding: 14px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+        .dialogue-topic-card:hover { transform: translateY(-5px); }
+        .dialogue-topic-card:active { transform: scale(0.97); }
+
+        .dialogue-thumb {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: 14px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #a8e6cf, #dcedc1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 46px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+        .dialogue-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .dialogue-topic-label {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        /* ===================== SENTENCE-BY-SENTENCE PRACTICE LIST ===================== */
+        .dialogue-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 4px;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        .dialogue-line:last-child { border-bottom: none; }
+
+        .dialogue-line-text { flex: 1; }
+
+        .dialogue-line-btn {
+            flex-shrink: 0;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: transform 0.15s ease;
+        }
+        .dialogue-line-btn:hover { transform: scale(1.08); }
+        .dialogue-line-btn:active { transform: scale(0.95); }
+
+        .dialogue-line.speaking {
+            background: #fff3cd;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 2px #f39c12;
+            transform: scale(1.02);
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* ===================== STEP-BY-STEP PRACTICE MODE ===================== */
+        .mode-btn-active {
+            outline: 3px solid #f39c12;
+            outline-offset: 2px;
+        }
+
+        .step-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            padding: 10px 4px 4px;
+        }
+
+        .step-progress-label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #888;
+        }
+
+        .step-progress-bar {
+            width: 100%;
+            height: 10px;
+            border-radius: 6px;
+            background: #eee;
+            overflow: hidden;
+        }
+        .step-progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-radius: 6px;
+            transition: width 0.25s ease;
+        }
+
+        .step-sentence-text {
+            font-size: 26px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .step-big-play-btn {
+            border: none;
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            font-size: 32px;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.18);
+            transition: transform 0.15s ease;
+        }
+        .step-big-play-btn:hover { transform: scale(1.06); }
+        .step-big-play-btn:active { transform: scale(0.95); }
+
+        .step-complete {
+            font-size: 22px;
+            font-weight: 700;
+            color: #27ae60;
+        }
+
+        #step-nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .step-progress-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #555;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        #step-prev-btn:disabled, #step-next-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ===================== QUIZ STYLES ===================== */
+        .quiz-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 22px;
+            max-width: 480px;
+            width: 100%;
+            padding: 30px 24px 26px 24px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .quiz-progress {
+            font-size: 16px;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .quiz-progress-bar-track {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .quiz-progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-emoji {
+            font-size: 72px;
+            line-height: 1;
+            margin: 4px 0 16px 0;
+        }
+
+        .quiz-question-text {
+            font-size: 26px;
+            font-weight: 800;
+            color: #333;
+            margin: 4px 0 22px 0;
+        }
+
+        .quiz-question-sub {
+            font-size: 14px;
+            color: #888;
+            margin-top: -6px;
+            margin-bottom: 18px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .quiz-option-btn {
+            padding: 16px 18px;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid #ddd;
+            border-radius: 14px;
+            background: #fafafa;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+        }
+        .quiz-option-btn:active { transform: scale(0.98); }
+        .quiz-option-btn.correct {
+            background: #e8f8ee;
+            border-color: #4CAF50;
+            color: #2e7d32;
+        }
+        .quiz-option-btn.wrong {
+            background: #fdeaea;
+            border-color: #f44336;
+            color: #c62828;
+        }
+        .quiz-option-btn.disabled {
+            pointer-events: none;
+            opacity: 0.55;
+        }
+        .quiz-mark {
+            font-size: 20px;
+            margin-left: 10px;
+        }
+
+        .quiz-nav-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .quiz-nav-btn {
+            flex: 1;
+            padding: 12px 10px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #607d8b;
+            color: #fff;
+        }
+        .quiz-nav-btn.next-btn { background: #4CAF50; }
+        .quiz-nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .quiz-result-emoji {
+            font-size: 90px;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .quiz-result-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .quiz-result-score {
+            font-size: 22px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .quiz-sticker {
+            font-size: 56px;
+            margin: 10px 0 20px 0;
+            animation: pop-sticker 0.6s ease;
+        }
+        @keyframes pop-sticker {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .quiz-result-btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .quiz-result-btn {
+            padding: 12px 22px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #fff;
+            background: #4CAF50;
+        }
+        .quiz-result-btn.secondary { background: #607d8b; }
+
+        @keyframes tick-pop {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .tick-anim { animation: tick-pop 0.35s ease; display: inline-block; }
+
+        /* ===================== MOBILE RESPONSIVE ADJUSTMENTS ===================== */
+        @media (max-width: 600px) {
+            .page {
+                padding: 56px 14px 30px 14px;
+            }
+            h1 {
+                font-size: 22px;
+                line-height: 1.3;
+                margin: 0 0 10px 0;
+                padding: 0 40px;
+                word-break: break-word;
+            }
+            #home-page h1 { padding: 0; }
+
+            .return-btn {
+                top: max(8px, env(safe-area-inset-top));
+                right: max(8px, env(safe-area-inset-right));
+                padding: 6px 10px;
+                font-size: 12px;
+                border-radius: 6px;
+                line-height: 1.4;
+            }
+
+            #home-page .home-subtitle {
+                font-size: 14px;
+                padding: 0 10px;
+            }
+
+            .home-button, .topic-button, .dialogue-button {
+                padding: 14px 20px;
+                font-size: 17px;
+                width: 100%;
+                max-width: 300px;
+                box-sizing: border-box;
+                margin: 6px 0;
+            }
+
+            .audio-control-btn {
+                padding: 9px 14px;
+                font-size: 14px;
+            }
+
+            #dialogue-controls { gap: 8px; }
+
+            .quiz-mode-intro { font-size: 12.5px; padding: 9px 16px; gap: 6px; }
+            .quiz-mode-intro-icon { font-size: 17px; }
+            .quiz-mode-grid { gap: 14px; max-width: 340px; }
+            .quiz-mode-card { width: 145px; padding: 18px 12px; border-radius: 14px; }
+            .quiz-mode-emoji { font-size: 38px; margin-bottom: 6px; }
+            .quiz-mode-label { font-size: 16px; }
+            .quiz-mode-sub { font-size: 11px; }
+
+            .vocab-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .vocab-item { padding: 16px 10px; }
+            .vocab-item p { font-size: 14px; }
+
+            #dialogue-topics {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .dialogue-thumb { font-size: 32px; margin-bottom: 8px; }
+            .dialogue-topic-label { font-size: 13px; }
+
+            .dialogue-box {
+                padding: 16px;
+                font-size: 16px;
+                line-height: 1.6;
+                max-height: 34vh;
+            }
+
+            .dialogue-detail-img {
+                max-height: 24vh;
+                margin-bottom: 10px;
+            }
+
+            .dialogue-line { padding: 10px 2px; gap: 8px; }
+            .dialogue-line-btn { width: 36px; height: 36px; font-size: 15px; }
+
+            .step-sentence-text { font-size: 19px; }
+            .step-big-play-btn { width: 64px; height: 64px; font-size: 26px; }
+            .step-progress-text, .step-progress-label { font-size: 13px; }
+
+            .quiz-card {
+                padding: 20px 16px 18px;
+                border-radius: 16px;
+                max-width: 100%;
+            }
+            .quiz-emoji { font-size: 48px; margin: 2px 0 14px 0; }
+            .quiz-question-text { font-size: 20px; margin: 4px 0 16px 0; }
+            .quiz-question-sub { font-size: 12px; margin-top: -4px; margin-bottom: 14px; }
+            .quiz-option-btn { padding: 12px 14px; font-size: 15px; }
+            .quiz-nav-btn { font-size: 14px; padding: 10px 8px; }
+            .quiz-audio-replay-btn { margin: 0 0 12px 0; }
+
+            .quiz-result-emoji { font-size: 64px; }
+            .quiz-result-title { font-size: 22px; }
+            .quiz-result-score { font-size: 17px; }
+            .quiz-sticker { font-size: 42px; }
+            .quiz-result-btn { padding: 10px 16px; font-size: 14px; }
+        }
+
+        @media (max-width: 360px) {
+            .vocab-grid { grid-template-columns: 1fr; }
+            #dialogue-topics { grid-template-columns: 1fr 1fr; }
+            .quiz-mode-card { width: 130px; }
+            h1 { font-size: 19px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+
+    <!-- 1. Home Page -->
+    <div id="home-page" class="page">
+        <img src="BG/kid_learning.PNG" alt="語言學習" class="home-title-image">
+        <button class="home-button" id="vocab-btn">
+            <img src="BG/vocab_button.PNG" alt="挑戰生字">
+        </button>
+        <button class="home-button" id="dialogue-btn">
+            <img src="BG/speaking_button.PNG" alt="開口講英文">
+        </button>
+        <button class="home-button" id="mix-quiz-btn">
+            <img src="BG/quiz_time_button.PNG" alt="小測驗">
+        </button>
+    </div>
+
+    <!-- 2. Topic Selection Page -->
+    <div id="vocab-topics-page" class="page" style="display: none;">
+        <img src="BG/select_vocab.PNG" alt="選擇生字主題" class="page-header-image">
+        <button class="return-btn" onclick="showPage('home-page')">返回主頁</button>
+        <div id="topic-buttons">
+            <button class="topic-button" id="fruits-btn">🍎 Fruits</button>
+            <button class="topic-button" id="animals-btn">🦁 Animals</button>
+            <button class="topic-button" id="transports-btn">🚗 Transports</button>
+            <button class="topic-button" id="family-btn">👨‍👩‍👧‍👦 Family</button>
+            <button class="topic-button" id="vegetables-btn">🥦 Vegetables</button>
+            <button class="topic-button" id="weather-btn">☀️ Weather</button>
+        </div>
+    </div>
+
+    <!-- 3. Dedicated Vocab Display Page -->
+    <div id="vocab-display-page" class="page" style="display: none;">
+        <h1 id="current-topic-title">主題</h1>
+        <button class="return-btn" onclick="showPage('vocab-topics-page')">返回主題選單</button>
+        <button class="quiz-launch-btn" id="start-quiz-btn">📝 開始小測驗</button>
+        <div id="vocab-items" class="vocab-grid"></div>
+    </div>
+
+    <!-- 4. Dialogue Practice Page (topic list) -->
+    <div id="dialogue-page" class="page" style="display: none;">
+        <img src="BG/speak_english.PNG" alt="開口講英文" class="page-header-image">
+        <button class="return-btn" onclick="showPage('home-page')">返回主頁</button>
+
+         <div id="dialogue-topics">
+        <!-- Picture cards are generated automatically from the `dialogue` data array (see renderDialogueTopics) -->
+    </div>
+    </div>
+
+    <!-- 4b. Dialogue Detail Page (script + image + play/stop controls) -->
+    <div id="dialogue-detail-page" class="page" style="display: none;">
+        <h1 id="dialogue-detail-title">開口講英文</h1>
+        <button class="return-btn" onclick="showPage('dialogue-page')">返回主題</button>
+
+        <div id="dialogue-controls" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:18px;">
+            <button id="mode-list-btn" class="audio-control-btn">📋 Full List</button>
+            <button id="mode-step-btn" class="audio-control-btn">🧩 Step-by-Step Practice</button>
+            <button id="play-dialogue-btn" class="audio-control-btn">🗣️ Play Full Dialogue</button>
+            <button id="stop-btn" class="audio-control-btn">⏹️ Stop</button>
+        </div>
+
+        <div class="dialogue-content-wrap">
+            <img id="dialogue-image" class="dialogue-detail-img" src="" alt="">
+            <div id="dialogue-script" class="dialogue-box"></div>
+            <div id="step-nav-controls" style="display:none;">
+                <button id="step-prev-btn" class="audio-control-btn">⬅️ Previous</button>
+                <span id="step-progress-text" class="step-progress-text">1 / 8</span>
+                <button id="step-next-btn" class="audio-control-btn">Next ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Quiz Page (question view + result view) -->
+    <div id="quiz-page" class="page" style="display: none;">
+        <img src="BG/quiz_time.PNG" alt="小測驗" class="page-header-image" id="quiz-title">
+        <button class="return-btn" onclick="exitQuiz()">返回生字頁</button>
+
+        <div id="quiz-question-view" class="quiz-card">
+            <div class="quiz-progress" id="quiz-progress-text">問題 1/6</div>
+            <div class="quiz-progress-bar-track">
+                <div class="quiz-progress-bar-fill" id="quiz-progress-fill" style="width:16.6%;"></div>
+            </div>
+            <div class="quiz-emoji" id="quiz-emoji">🍎</div>
+            <div class="quiz-question-text" id="quiz-question-text">這是什麼？</div>
+            <div class="quiz-question-sub">請選擇正確的英文答案</div>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div class="quiz-nav-row">
+                <button class="quiz-nav-btn" id="quiz-prev-btn">⬅️ 上一題</button>
+                <button class="quiz-nav-btn next-btn" id="quiz-next-btn">下一題 ➡️</button>
+            </div>
+        </div>
+
+        <div id="quiz-result-view" class="quiz-card" style="display:none; text-align:center;">
+            <div class="quiz-result-emoji" id="quiz-result-emoji">🎉</div>
+            <div class="quiz-result-title">恭喜完成！</div>
+            <div class="quiz-result-score" id="quiz-result-score">你答對了 0/6 題</div>
+            <div id="quiz-full-score-sticker" style="display:none;">
+                <div class="quiz-sticker">🌟🏆🌟</div>
+                <div style="font-size:18px; color:#e67e22; font-weight:700;">滿分！你是生字小天才！</div>
+            </div>
+            <div class="quiz-result-btns">
+                <button class="quiz-result-btn" id="quiz-retry-btn">🔁 再玩一次</button>
+                <button class="quiz-result-btn secondary" onclick="exitQuiz()">📚 返回生字頁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Mixed/Random Quiz Mode Select Page -->
+    <div id="quiz-mode-page" class="page" style="display: none;">
+        <img src="BG/quiz_time.PNG" alt="小測驗" class="page-header-image">
+        <button class="return-btn" onclick="showPage('home-page')">返回主頁</button>
+        <div class="quiz-mode-intro">
+            <span class="quiz-mode-intro-icon">🎯</span>
+            <span>每次隨機抽 8 題，題目嚟自所有生字主題📚揀你想要嘅挑戰模式</span>
+        </div>
+        <div class="quiz-mode-grid">
+            <button class="quiz-mode-card listening-mode" id="listening-quiz-btn">
+                <div class="quiz-mode-emoji">🔊</div>
+                <div class="quiz-mode-label">Listening Quiz</div>
+                <div class="quiz-mode-sub">聽英文讀音，揀出啱嘅圖示</div>
+            </button>
+            <button class="quiz-mode-card reading-mode" id="reading-quiz-btn">
+                <div class="quiz-mode-emoji">📖</div>
+                <div class="quiz-mode-label">Word Matching Quiz</div>
+                <div class="quiz-mode-sub">睇英文生字，揀出正確中文</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 7. Mixed/Random Quiz Page (question view + result view) -->
+    <div id="mixed-quiz-page" class="page" style="display: none;">
+        <img src="BG/quiz_time.PNG" alt="小測驗" class="page-header-image" id="mixed-quiz-title">
+        <button class="return-btn" onclick="exitMixedQuiz()">返回選擇</button>
+
+        <div id="mixed-quiz-question-view" class="quiz-card">
+            <div class="quiz-progress" id="mixed-quiz-progress-text">問題 1/8</div>
+            <div class="quiz-progress-bar-track">
+                <div class="quiz-progress-bar-fill" id="mixed-quiz-progress-fill" style="width:12.5%;"></div>
+            </div>
+            <div id="mixed-quiz-audio-row" style="display:none;">
+                <button class="quiz-audio-replay-btn" id="mixed-quiz-replay-btn">🔊 再聽一次</button>
+            </div>
+            <div class="quiz-emoji" id="mixed-quiz-emoji">❓</div>
+            <div class="quiz-question-text" id="mixed-quiz-question-text">Apple</div>
+            <div class="quiz-question-sub" id="mixed-quiz-question-sub">請選擇正確答案</div>
+            <div class="quiz-options" id="mixed-quiz-options"></div>
+            <div class="quiz-nav-row">
+                <button class="quiz-nav-btn" id="mixed-quiz-prev-btn">⬅️ 上一題</button>
+                <button class="quiz-nav-btn next-btn" id="mixed-quiz-next-btn">下一題 ➡️</button>
+            </div>
+        </div>
+
+        <div id="mixed-quiz-result-view" class="quiz-card" style="display:none; text-align:center;">
+            <div class="quiz-result-emoji" id="mixed-quiz-result-emoji">🎉</div>
+            <div class="quiz-result-title">恭喜完成！</div>
+            <div class="quiz-result-score" id="mixed-quiz-result-score">你答對了 0/8 題</div>
+            <div id="mixed-quiz-full-score-sticker" style="display:none;">
+                <div class="quiz-sticker">🌟🏆🌟</div>
+                <div style="font-size:18px; color:#e67e22; font-weight:700;">滿分！你是生字小天才！</div>
+            </div>
+            <div class="quiz-result-btns">
+                <button class="quiz-result-btn" id="mixed-quiz-retry-btn">🔁 再玩一次</button>
+                <button class="quiz-result-btn secondary" onclick="exitMixedQuiz()">🎲 返回選擇</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="capacitor.js"></script>
+    <script>
+// 生字資料庫 (每組 20 個生字)
+let vocab = [
+  // Fruits
+  { topic: "Fruits", emoji: "🍎", chineseName: "蘋果", englishName: "Apple" },
+  { topic: "Fruits", emoji: "🍌", chineseName: "香蕉", englishName: "Banana" },
+  { topic: "Fruits", emoji: "🍊", chineseName: "橙", englishName: "Orange" },
+  { topic: "Fruits", emoji: "🍓", chineseName: "草莓", englishName: "Strawberry" },
+  { topic: "Fruits", emoji: "🍇", chineseName: "葡萄", englishName: "Grape" },
+  { topic: "Fruits", emoji: "🍉", chineseName: "西瓜", englishName: "Watermelon" },
+  { topic: "Fruits", emoji: "🍍", chineseName: "菠蘿", englishName: "Pineapple" },
+  { topic: "Fruits", emoji: "🥭", chineseName: "芒果", englishName: "Mango" },
+  { topic: "Fruits", emoji: "🍑", chineseName: "桃子", englishName: "Peach" },
+  { topic: "Fruits", emoji: "🍒", chineseName: "櫻桃", englishName: "Cherry" },
+  { topic: "Fruits", emoji: "🍐", chineseName: "梨子", englishName: "Pear" },
+  { topic: "Fruits", emoji: "🥝", chineseName: "奇異果", englishName: "Kiwi" },
+  { topic: "Fruits", emoji: "🍋", chineseName: "檸檬", englishName: "Lemon" },
+  { topic: "Fruits", emoji: "🍈", chineseName: "蜜瓜", englishName: "Melon" },
+  { topic: "Fruits", emoji: "🥥", chineseName: "椰子", englishName: "Coconut" },
+  { topic: "Fruits", emoji: "🥑", chineseName: "牛油果", englishName: "Avocado" },
+  { topic: "Fruits", emoji: "🫐", chineseName: "藍莓", englishName: "Blueberry" },
+  { topic: "Fruits", emoji: "🍅", chineseName: "番茄", englishName: "Tomato" },
+  { topic: "Fruits", emoji: "🍏", chineseName: "青蘋果", englishName: "Green Apple" },
+  { topic: "Fruits", emoji: "🍋‍🟩", chineseName: "青檸", englishName: "Lime" },
+
+  // Animals
+  { topic: "Animals", emoji: "🦁", chineseName: "獅子", englishName: "Lion" },
+  { topic: "Animals", emoji: "🐯", chineseName: "老虎", englishName: "Tiger" },
+  { topic: "Animals", emoji: "🐻", chineseName: "熊", englishName: "Bear" },
+  { topic: "Animals", emoji: "🐼", chineseName: "大熊貓", englishName: "Panda" },
+  { topic: "Animals", emoji: "🐨", chineseName: "樹熊", englishName: "Koala" },
+  { topic: "Animals", emoji: "🐰", chineseName: "兔子", englishName: "Rabbit" },
+  { topic: "Animals", emoji: "🐱", chineseName: "貓咪", englishName: "Cat" },
+  { topic: "Animals", emoji: "🐶", chineseName: "狗狗", englishName: "Dog" },
+  { topic: "Animals", emoji: "🦊", chineseName: "狐狸", englishName: "Fox" },
+  { topic: "Animals", emoji: "🐵", chineseName: "猴子", englishName: "Monkey" },
+  { topic: "Animals", emoji: "🐷", chineseName: "豬", englishName: "Pig" },
+  { topic: "Animals", emoji: "🐮", chineseName: "乳牛", englishName: "Cow" },
+  { topic: "Animals", emoji: "🐑", chineseName: "綿羊", englishName: "Sheep" },
+  { topic: "Animals", emoji: "🐴", chineseName: "馬", englishName: "Horse" },
+  { topic: "Animals", emoji: "🐘", chineseName: "大象", englishName: "Elephant" },
+  { topic: "Animals", emoji: "🦒", chineseName: "長頸鹿", englishName: "Giraffe" },
+  { topic: "Animals", emoji: "🦘", chineseName: "袋鼠", englishName: "Kangaroo" },
+  { topic: "Animals", emoji: "🦅", chineseName: "老鷹", englishName: "Eagle" },
+  { topic: "Animals", emoji: "🦆", chineseName: "鴨子", englishName: "Duck" },
+  { topic: "Animals", emoji: "🦉", chineseName: "貓頭鷹", englishName: "Owl" },
+
+  // Transports
+  { topic: "Transports", emoji: "🚗", chineseName: "私家車", englishName: "Car" },
+  { topic: "Transports", emoji: "🚌", chineseName: "巴士", englishName: "Bus" },
+  { topic: "Transports", emoji: "🚕", chineseName: "的士", englishName: "Taxi" },
+  { topic: "Transports", emoji: "🚑", chineseName: "救護車", englishName: "Ambulance" },
+  { topic: "Transports", emoji: "🚒", chineseName: "消防車", englishName: "Fire truck" },
+  { topic: "Transports", emoji: "🚓", chineseName: "警車", englishName: "Police car" },
+  { topic: "Transports", emoji: "🚚", chineseName: "貨車", englishName: "Truck" },
+  { topic: "Transports", emoji: "🚲", chineseName: "單車", englishName: "Bicycle" },
+  { topic: "Transports", emoji: "🛵", chineseName: "電單車", englishName: "Scooter" },
+  { topic: "Transports", emoji: "🚂", chineseName: "火車", englishName: "Train" },
+  { topic: "Transports", emoji: "🚇", chineseName: "地鐵", englishName: "Subway" },
+  { topic: "Transports", emoji: "✈️", chineseName: "飛機", englishName: "Airplane" },
+  { topic: "Transports", emoji: "🚁", chineseName: "直升機", englishName: "Helicopter" },
+  { topic: "Transports", emoji: "🚢", chineseName: "輪船", englishName: "Ship" },
+  { topic: "Transports", emoji: "⛵", chineseName: "帆船", englishName: "Boat" },
+  { topic: "Transports", emoji: "🚀", chineseName: "火箭", englishName: "Rocket" },
+  { topic: "Transports", emoji: "🚜", chineseName: "拖拉機", englishName: "Tractor" },
+  { topic: "Transports", emoji: "🚠", chineseName: "纜車", englishName: "Cable car" },
+  { topic: "Transports", emoji: "🛹", chineseName: "滑板", englishName: "Skateboard" },
+  { topic: "Transports", emoji: "🛸", chineseName: "飛碟", englishName: "UFO" },
+
+  // Family
+  { topic: "Family", emoji: "👨", chineseName: "爸爸", englishName: "Father" },
+  { topic: "Family", emoji: "👩", chineseName: "媽媽", englishName: "Mother" },
+  { topic: "Family", emoji: "👦", chineseName: "哥哥/弟弟", englishName: "Brother" },
+  { topic: "Family", emoji: "👧", chineseName: "姐姐/妹妹", englishName: "Sister" },
+  { topic: "Family", emoji: "👴", chineseName: "爺爺/外公", englishName: "Grandfather" },
+  { topic: "Family", emoji: "👵", chineseName: "奶奶/外婆", englishName: "Grandmother" },
+  { topic: "Family", emoji: "👶", chineseName: "嬰兒", englishName: "Baby" },
+  { topic: "Family", emoji: "👨‍🦱", chineseName: "叔叔", englishName: "Uncle" },
+  { topic: "Family", emoji: "👩‍🦰", chineseName: "阿姨", englishName: "Aunt" },
+  { topic: "Family", emoji: "🧑‍🤝‍🧑", chineseName: "堂表兄弟姊妹", englishName: "Cousin" },
+  { topic: "Family", emoji: "👪", chineseName: "家人", englishName: "Family" },
+  { topic: "Family", emoji: "🏡", chineseName: "家", englishName: "Home" },
+  { topic: "Family", emoji: "👫", chineseName: "父母", englishName: "Parents" },
+  { topic: "Family", emoji: "👨‍👩‍👦", chineseName: "兒子", englishName: "Son" },
+  { topic: "Family", emoji: "👨‍👩‍👧", chineseName: "女兒", englishName: "Daughter" },
+  { topic: "Family", emoji: "🤝", chineseName: "朋友", englishName: "Friend" },
+  { topic: "Family", emoji: "🧑", chineseName: "大人", englishName: "Adult" },
+  { topic: "Family", emoji: "🧒", chineseName: "小孩", englishName: "Child" },
+  { topic: "Family", emoji: "💗", chineseName: "愛", englishName: "Love" },
+  { topic: "Family", emoji: "🐾", chineseName: "寵物", englishName: "Pet" },
+
+  // Vegetables
+  { topic: "Vegetables", emoji: "🥦", chineseName: "西蘭花", englishName: "Broccoli" },
+  { topic: "Vegetables", emoji: "🥕", chineseName: "胡蘿蔔", englishName: "Carrot" },
+  { topic: "Vegetables", emoji: "🌽", chineseName: "玉米", englishName: "Corn" },
+  { topic: "Vegetables", emoji: "🥔", chineseName: "馬鈴薯", englishName: "Potato" },
+  { topic: "Vegetables", emoji: "🧅", chineseName: "洋蔥", englishName: "Onion" },
+  { topic: "Vegetables", emoji: "🧄", chineseName: "大蒜", englishName: "Garlic" },
+  { topic: "Vegetables", emoji: "🥬", chineseName: "生菜", englishName: "Lettuce" },
+  { topic: "Vegetables", emoji: "🥒", chineseName: "青瓜", englishName: "Cucumber" },
+  { topic: "Vegetables", emoji: "🍆", chineseName: "茄子", englishName: "Eggplant" },
+  { topic: "Vegetables", emoji: "🌶️", chineseName: "辣椒", englishName: "Chili" },
+  { topic: "Vegetables", emoji: "🍄", chineseName: "蘑菇", englishName: "Mushroom" },
+  { topic: "Vegetables", emoji: "🎃", chineseName: "南瓜", englishName: "Pumpkin" },
+  { topic: "Vegetables", emoji: "🍠", chineseName: "番薯", englishName: "Sweet potato" },
+  { topic: "Vegetables", emoji: "🌱", chineseName: "豆芽", englishName: "Bean sprout" },
+  { topic: "Vegetables", emoji: "🥗", chineseName: "沙律", englishName: "Salad" },
+  { topic: "Vegetables", emoji: "🫑", chineseName: "燈籠椒", englishName: "Bell pepper" },
+  { topic: "Vegetables", emoji: "🫛", chineseName: "碗豆", englishName: "Pea" },
+  { topic: "Vegetables", emoji: "🥬", chineseName: "菠菜", englishName: "Spinach" },
+  { topic: "Vegetables", emoji: "🥣", chineseName: "蔬菜湯", englishName: "Soup" },
+  { topic: "Vegetables", emoji: "🌿", chineseName: "香草", englishName: "Herb" },
+
+  // Weather
+  { topic: "Weather", emoji: "☀️", chineseName: "太陽", englishName: "Sun" },
+  { topic: "Weather", emoji: "☁️", chineseName: "雲", englishName: "Cloud" },
+  { topic: "Weather", emoji: "🌧️", chineseName: "下雨", englishName: "Rain" },
+  { topic: "Weather", emoji: "❄️", chineseName: "下雪", englishName: "Snow" },
+  { topic: "Weather", emoji: "⚡", chineseName: "雷電", englishName: "Lightning" },
+  { topic: "Weather", emoji: "🌪️", chineseName: "龍捲風", englishName: "Tornado" },
+  { topic: "Weather", emoji: "🌈", chineseName: "彩虹", englishName: "Rainbow" },
+  { topic: "Weather", emoji: "💨", chineseName: "大風", englishName: "Wind" },
+  { topic: "Weather", emoji: "🌤️", chineseName: "晴時多雲", englishName: "Sunny" },
+  { topic: "Weather", emoji: "🌫️", chineseName: "大霧", englishName: "Fog" },
+  { topic: "Weather", emoji: "☔", chineseName: "雨傘", englishName: "Umbrella" },
+  { topic: "Weather", emoji: "🌡️", chineseName: "溫度", englishName: "Temperature" },
+  { topic: "Weather", emoji: "🔥", chineseName: "炎熱", englishName: "Hot" },
+  { topic: "Weather", emoji: "❄️", chineseName: "寒冷", englishName: "Cold" },
+  { topic: "Weather", emoji: "🌌", chineseName: "夜空", englishName: "Sky" },
+  { topic: "Weather", emoji: "🌙", chineseName: "月亮", englishName: "Moon" },
+  { topic: "Weather", emoji: "⭐", chineseName: "星星", englishName: "Star" },
+  { topic: "Weather", emoji: "💧", chineseName: "雨滴", englishName: "Drop" },
+  { topic: "Weather", emoji: "🌊", chineseName: "海浪", englishName: "Wave" },
+  { topic: "Weather", emoji: "🍂", chineseName: "秋天", englishName: "Autumn" }
+];
+
+let dialogue = [
+  {
+    id: 'breakfast-btn',
+    title: '🍽️ Breakfast Time',
+    coverImage: 'dialogue/breakfast.jpg',
+    imageSegments: [
+        { start: 0, end: 2, image: 'dialogue/breakfast1.png' },
+        { start: 3, end: 4, image: 'dialogue/breakfast2.png' },
+        { start: 5, end: 8, image: 'dialogue/breakfast3.png' },
+        { start: 9, end: 12, image: 'dialogue/breakfast4.png' }
+    ],
+    script:
+      `Alice 👧: Hi, how are you?<br>Alice 👧: I'm a bit hungry.<br>Bob 👦: Let's have breakfast!<br>Alice 👧: What would you like to eat?<br>Bob 👦: How about some pancakes?<br>Alice 👧: Sounds good! Let me get the syrup.<br>Bob 👦: I love syrup!<br>Alice 👧: Me too! Here's your pancake.<br>Bob 👦: Thanks, Alice. This is delicious.<br>Alice 👧: Glad you like it! Do you want more?<br>Bob 👦: No thanks, I'm full.<br>Alice 👧: Okay! Well, let's clean up then.<br>Bob 👦: Sounds good to me.`,
+  },
+  {
+    id: 'play-in-park-btn',
+    title: '🛝 Play in the Park',
+    coverImage: 'dialogue/park_full.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/park1.png' },
+        { start: 2, end: 3, image: 'dialogue/park2.png' },
+        { start: 4, end: 5, image: 'dialogue/park3.png' },
+        { start: 6, end: 7, image: 'dialogue/park4.png' },
+        { start: 8, end: 9, image: 'dialogue/park5.png' },
+        { start: 10, end: 15, image: 'dialogue/park6.png' }        
+    ],
+    script:
+      `Alice 👧: Hey, Bob! Look at the playground!<br>Bob 👦: Wow! Let's go to the swings first!<br>Alice 👧: I want to swing high! Push me, please!<br>Bob 👦: Okay! One, two, three, go!<br>Alice 👧: Wheee! This is so much fun!<br>Bob 👦: My turn! Now let's run to the slide.<br>Alice 👧: Look at the big red slide!<br>Bob 👦: Climb up the ladder carefully.<br>Alice 👧: I am at the top! Watch me slide down!<br>Bob 👦: Yay! That was so fast!<br>Alice 👧: Now, let's climb the jungle gym.<br>Bob 👦: Hold on tight with your hands!<br>Alice 👧: I can climb like a monkey!<br>Bob 👦: Me too! Look how high we are!<br>Alice 👧: We are the masters of the park!<br>Bob 👦: I love playing here with you!`,
+  },
+  {
+    id: 'in-classroom-btn',
+    title: '🏫 In the Classroom',
+    coverImage: 'dialogue/classroom.jpg',
+    imageSegments: [
+        { start: 0, end: 2, image: 'dialogue/classroom1.png' },
+        { start: 3, end: 4, image: 'dialogue/classroom2.png' },
+        { start: 5, end: 7, image: 'dialogue/classroom3.png' },
+        { start: 8, end: 9, image: 'dialogue/classroom4.png' },       
+    ],
+    script:
+      `Alice 👧: Good morning, class.<br>Alice 👧: Okay, let's start our lesson.<br>Bob 👦: Great idea, Alice!<br>Alice 👧: Thank you! Now, who can tell me what we're learning today?<br>Bob 👦: Um... is it math?<br>Alice 👧: That's right! We're learning about fractions.<br>Alice 👧: Can anyone show me an example of a fraction?<br>Bob 👦: I don't know, Alice.<br>Alice 👧: Don't worry, Bob. It's okay to ask questions.<br>Bob 👦: Thanks, Alice. I'll try again.`,
+  },
+  {
+    id: 'in-bathroom-btn',
+    title: '🚿 In the Bathroom',
+    coverImage: 'dialogue/bathroom.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/bath1.png' },
+        { start: 2, end: 3, image: 'dialogue/bath2.png' },
+        { start: 4, end: 5, image: 'dialogue/bath3.png' },
+        { start: 6, end: 9, image: 'dialogue/bath4.png' },       
+    ],
+    script:
+      `Alice 👧: Excuse me, do you mind if I use the bathroom?<br>Bob 👦: No problem! Go ahead!<br>Alice 👧: Thanks. Okay, let me just wash my hands.<br>Bob 👦: Good idea. You don't want to get sick.<br>Alice 👧: I know. Let's use some soap and water.<br>Bob 👦: Sounds good to me!<br>Alice 👧: Okay, now let's rinse our hands under the faucet.<br>Bob 👦: Good idea. Get it all off your skin.<br>Alice 👧: Yay! Now we're clean!<br>Bob 👦: Well done, Alice.`,
+  },
+  {
+    id: 'in-living-room-btn',
+    title: '🛋️ In the Living Room',
+    coverImage: 'dialogue/living.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/living1.png' },
+        { start: 2, end: 3, image: 'dialogue/living2.png' },
+        { start: 4, end: 5, image: 'dialogue/living3.png' },
+        { start: 6, end: 8, image: 'dialogue/living4.png' },       
+    ],
+    script:
+      `Alice 👧: Hey, Bob! Want to watch a movie?<br>Alice 👧: Let's pick one from the Disney+<br>Bob 👦: What do you think we should watch?<br>Alice 👧: Hmm... let me see. How about "The Lion King"?<br>Bob 👦: Ooh, I love that one!<br>Alice 👧: Me too! Let's me open the app and stream it now.<br>Bob 👦: Okay, got it. Now what?<br>Alice 👧: Now let's get some popcorn ready!<br>Bob 👦: Mmm... yum!<br>Alice 👧: Time to watch our movie!`,
+  },
+  {
+    id: 'restaurant-btn',
+    title: '🍔 At the Restaurant',
+    coverImage: 'dialogue/restaurant.jpg',
+    imageSegments: [
+        { start: 0, end: 2, image: 'dialogue/restaurant1.png' },
+        { start: 3, end: 5, image: 'dialogue/restaurant2.png' },
+        { start: 6, end: 9, image: 'dialogue/restaurant3.png' },
+        { start: 10, end: 13, image: 'dialogue/restaurant4.png' }, 
+        { start: 14, end: 19, image: 'dialogue/restaurant5.png' },      
+    ],
+    script:
+      `Server 🧑‍🍳: Hello! Welcome to the Happy Diner!<br>Alice 👧: Hi, a table for two, please!<br>Server 🧑‍🍳: Follow me, please.<br>Server 🧑‍🍳: Here are your menus.<br>Bob 👦: Wow, look at the pictures!<br>Alice 👧: I am so hungry!<br>Server 🧑‍🍳: What would you like to drink?<br>Bob 👦: Apple juice, please!<br>Alice 👧: Milk for me, thank you.<br>Server 🧑‍🍳: Great, I will bring your drinks.<br>Server 🧑‍🍳: Are you ready to order your food?<br>Bob 👦: Yes! I want a big beef burger and yummy fries.<br>Alice 👧: Can I have the tomato pasta, please?<br>Server 🧑‍🍳: Yummy choices!<br>Server 🧑‍🍳: Did you like the food?<br>Bob 👦: Yes, the burger was super delicious!<br>Alice 👧: My pasta was great too, yum!<br>Server 🧑‍🍳: Awesome, do you want some chocolate ice cream?<br>Alice 👧: Oh no, my tummy is too full!<br>Bob 👦: Check, please!`,
+  },
+  {
+    id: 'fruit-market-btn',
+    title: '🍎 At the Fruit Market',
+    coverImage: 'dialogue/fruit.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/fruit1.png' },
+        { start: 2, end: 3, image: 'dialogue/fruit2.png' },
+        { start: 4, end: 6, image: 'dialogue/fruit3.png' },
+        { start: 7, end: 9, image: 'dialogue/fruit4.png' }, 
+    ],
+    script:
+      `Alice 👧: Hi Bob! Let's buy some fruits!<br>Bob 👦: Look, there are so many apples!<br>Alice 👧: I want a banana too.<br>Bob 👦: Can we get an orange as well?<br>Alice 👧: Grapes look so sweet today.<br>Bob 👦: A watermelon would be perfect for summer!<br>Alice 👧: Let's grab some strawberries too.<br>Bob 👦: Okay, let's put everything in the basket.<br>Alice 👧: How much does it cost?<br>Bob 👦: Not too much, let's pay now.`,
+  },
+  {
+    id: 'zoo-btn',
+    title: '🦁 At the Zoo',
+    coverImage: 'dialogue/zoo.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/zoo1.png' },
+        { start: 2, end: 3, image: 'dialogue/zoo2.png' },
+        { start: 4, end: 5, image: 'dialogue/zoo3.png' },
+        { start: 6, end: 8, image: 'dialogue/zoo4.png' }, 
+    ],
+    script:
+      `Alice 👧: Look, Bob! A lion!<br>Bob 👦: Wow, it looks so strong!<br>Alice 👧: An elephant is over there too.<br>Bob 👦: That giraffe has such a long neck!<br>Alice 👧: I love pandas, they are so cute.<br>Bob 👦: The monkeys are playing together.<br>Alice 👧: Look up, an eagle is flying!<br>Bob 👦: Let's take a photo here.<br>Alice 👧: This is the best day ever!`,
+  },
+  {
+    id: 'transport-ride-btn',
+    title: "🚗 Let's Go for a Ride",
+    coverImage: 'dialogue/ride.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/ride1.png' },
+        { start: 2, end: 3, image: 'dialogue/ride2.png' },
+        { start: 4, end: 5, image: 'dialogue/ride3.png' },
+        { start: 6, end: 7, image: 'dialogue/ride4.png' }, 
+    ],
+    script:
+      `Alice 👧: Bob, how do you go to school?<br>Bob 👦: I take the bus every day.<br>Alice 👧: I usually ride my bicycle.<br>Bob 👦: Sometimes we take a taxi too.<br>Alice 👧: I want to fly on an airplane one day.<br>Bob 👦: A train ride sounds fun too!<br>Alice 👧: Maybe a rocket one day, ha ha!<br>Bob 👦: That would be so cool!`,
+  },
+  {
+    id: 'family-time-btn',
+    title: '👨‍👩‍👧‍👦 Our Family',
+    coverImage: 'dialogue/family.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/family1.png' },
+        { start: 2, end: 3, image: 'dialogue/family2.png' },
+        { start: 4, end: 5, image: 'dialogue/family3.png' },
+        { start: 6, end: 7, image: 'dialogue/family4.png' }, 
+    ],
+    script:
+      `Alice 👧: This is my father.<br>Bob 👦: And this is my mother.<br>Alice 👧: I have a little brother.<br>Bob 👦: I have an older sister.<br>Alice 👧: My grandfather tells great stories.<br>Bob 👦: My grandmother makes yummy food.<br>Alice 👧: I love my family so much.<br>Bob 👦: Family is the best!`,
+  },
+  {
+    id: 'kitchen-veggies-btn',
+    title: '🥦 Helping in the Kitchen',
+    coverImage: 'dialogue/kitchen.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/kitchen1.png' },
+        { start: 2, end: 3, image: 'dialogue/kitchen2.png' },
+        { start: 4, end: 5, image: 'dialogue/kitchen3.png' },
+        { start: 6, end: 7, image: 'dialogue/kitchen4.png' }, 
+    ],
+    script:
+      `Alice 👧: Bob, can you wash the broccoli?<br>Bob 👦: Sure! I will cut the carrots too.<br>Alice 👧: Let's peel some potatoes.<br>Bob 👦: The corn smells so good.<br>Alice 👧: Careful, the onion makes me cry!<br>Bob 👦: Ha ha, me too!<br>Alice 👧: Let's make a big salad together.<br>Bob 👦: I can't wait to eat it!`,
+  },
+  {
+    id: 'weather-talk-btn',
+    title: "☀️ What's the Weather Today",
+    coverImage: 'dialogue/weather.jpg',
+    imageSegments: [
+        { start: 0, end: 1, image: 'dialogue/weather1.png' },
+        { start: 2, end: 3, image: 'dialogue/weather2.png' },
+        { start: 4, end: 5, image: 'dialogue/weather3.png' },
+        { start: 6, end: 7, image: 'dialogue/weather4.png' }, 
+    ],
+    script:
+      `Alice 👧: It's so sunny today!<br>Bob 👦: But look, some clouds are coming.<br>Alice 👧: I think it might rain later.<br>Bob 👦: I will bring my umbrella then.<br>Alice 👧: Look, a rainbow after the rain!<br>Bob 👦: It's a bit windy now too.<br>Alice 👧: I can't wait for snow in winter.<br>Bob 👦: Me too, that will be so fun!`,
+  },
+];
+
+// 頁面控制
+// 用嚟令逐句朗讀迴圈喺切換主題/按停止時即刻失效
+let dialoguePlayToken = 0;
+
+// 逐句練習 (Step-by-Step Practice) 相關狀態
+let dialogueViewMode = 'list';       // 'list' = 全部句子一齊顯示 / 'step' = 一次淨係顯示一句
+let dialogueStepIndex = 0;           // 目前練習緊第幾句 (0-based)
+let currentDialogueSentences = [];   // 已拆好句嘅陣列，畀 list / step 兩個 view 共用
+let currentDialogueTopic = null;     // 目前呢個主題嘅完整資料 (dialogue 陣列入面嗰粒 object)
+
+function showPage(pageId) {
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('vocab-topics-page').style.display = 'none';
+    document.getElementById('vocab-display-page').style.display = 'none';
+    document.getElementById('dialogue-page').style.display = 'none';
+    document.getElementById('dialogue-detail-page').style.display = 'none';
+    document.getElementById('quiz-page').style.display = 'none';
+    document.getElementById('quiz-mode-page').style.display = 'none';
+    document.getElementById('mixed-quiz-page').style.display = 'none';
+
+    document.getElementById(pageId).style.display = 'flex';
+
+    // 離開頁面時自動停止發音
+    stopSpeaking();
+    dialoguePlayToken++;
+}
+
+// 主選單點擊
+document.getElementById('vocab-btn').addEventListener('click', () => showPage('vocab-topics-page'));
+document.getElementById('dialogue-btn').addEventListener('click', () => showPage('dialogue-page'));
+
+let currentTopic = null;
+
+// 點擊主題，進入生字頁
+document.querySelectorAll('.topic-button').forEach((button) => {
+  button.addEventListener('click', (e) => {
+    let topicMap = {
+        'fruits-btn': 'Fruits', 'animals-btn': 'Animals', 'transports-btn': 'Transports',
+        'family-btn': 'Family', 'vegetables-btn': 'Vegetables', 'weather-btn': 'Weather'
+    };
+    let chosenTopic = topicMap[e.target.id];
+    currentTopic = chosenTopic;
+    document.getElementById('current-topic-title').innerText = chosenTopic;
+    displayVocabItems(chosenTopic);
+    showPage('vocab-display-page');
+  });
+});
+
+// 產生對話主題嘅圖卡 (根據 dialogue 陣列自動生成，包含圖片同標題)
+// 每個主題一張卡：有圖就顯示圖片，冇圖 (或圖片載入失敗) 就用 emoji 代替
+function renderDialogueTopics() {
+  let container = document.getElementById('dialogue-topics');
+  container.innerHTML = '';
+
+  dialogue.forEach((d) => {
+    // 標題開頭係 emoji，之後先係文字，例如 '🍽️ Breakfast Time'
+    let firstSpace = d.title.indexOf(' ');
+    let emoji = firstSpace > -1 ? d.title.slice(0, firstSpace) : '💬';
+    let labelText = firstSpace > -1 ? d.title.slice(firstSpace + 1) : d.title;
+
+    let card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'dialogue-topic-card';
+    card.id = d.id;
+
+    let thumb = document.createElement('div');
+    thumb.className = 'dialogue-thumb';
+
+    if (d.coverImage) {
+      let img = document.createElement('img');
+      img.src = d.coverImage;
+      img.alt = labelText;
+      // 圖片未加入 / 載入失敗時，改用 emoji 佔位，唔會出現破圖 icon
+      img.onerror = () => {
+        thumb.innerHTML = '';
+        thumb.innerText = emoji;
+      };
+      thumb.appendChild(img);
+    } else {
+      thumb.innerText = emoji;
+    }
+
+    let label = document.createElement('div');
+    label.className = 'dialogue-topic-label';
+    label.innerText = d.title;
+
+    card.appendChild(thumb);
+    card.appendChild(label);
+
+    card.addEventListener('click', () => {
+      stopSpeaking(); // 切換主題時，停止正在播放嘅語音
+      dialoguePlayToken++;
+      showPage('dialogue-detail-page');
+      displayDialogueScript(d.id);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+renderDialogueTopics();
+
+/* ---------- 語音角色設定 ----------
+   Alice = 5 歲女孩、Bob = 5 歲男孩、Server = 成人男聲 (餐廳侍應)
+   小朋友嘅聲線特徵係音調較高、語速偏快，所以除咗揀選合適嘅底層聲線之外，
+   仲會用 pitch/rate 微調，模擬童聲效果。 */
+let preferredMaleVoice = null;      // 成人男聲 (Server 用)
+let preferredMaleVoiceAlt = null;   // 第二把成人男聲 (Server 冇專屬男聲時嘅後備)
+let preferredFemaleVoice = null;    // 底層女聲 (Alice 用，再加高音調扮童聲)
+let preferredBoyishVoice = null;    // 底層男聲 (Bob 用，再加高音調扮童聲)
+let preferredChildVoice = null;     // 裝置若有真正嘅童聲/角色聲，優先使用
+
+// 普通話 (Mandarin) / 廣東話 (Cantonese) 聲線
+let preferredMandarinVoice = null;
+let preferredCantoneseVoice = null;
+
+function loadDialogueVoices() {
+    let voices = window.speechSynthesis.getVoices() || [];
+    let enVoices = voices.filter(v => v.lang && v.lang.toLowerCase().indexOf('en') === 0);
+
+    // 裝置若內建童聲/角色聲 (例如 macOS/Safari 嘅 "Junior")，優先揀嚟做細路聲
+    let childNamePattern = /(junior|child|kid|superstar)/i;
+    preferredChildVoice = enVoices.find(v => childNamePattern.test(v.name)) || null;
+
+    // 收集所有偵測到嘅男聲候選 (依名稱關鍵字比對)，去除重複
+    let maleNamePattern = /(daniel|fred|alex|david|mark|tom|thomas|james|george|guy|ryan|aaron|liam|oliver|arthur|male)/i;
+    let maleCandidates = enVoices.filter(v => maleNamePattern.test(v.name) && !/female/i.test(v.name));
+    let seenURI = {};
+    maleCandidates = maleCandidates.filter(v => {
+        if (seenURI[v.voiceURI]) return false;
+        seenURI[v.voiceURI] = true;
+        return true;
+    });
+
+    preferredMaleVoice = maleCandidates[0] || null;
+    preferredMaleVoiceAlt = maleCandidates[1] || null;
+    preferredBoyishVoice = maleCandidates[0] || null;
+
+    // 女聲揀選：優先揀「Natural / Online / Premium / Enhanced」呢類高質素、
+    // 聽落本身已經比較後生清脆嘅聲線 (Edge/Windows 呢類聲通常最似真人)，
+    // 再退而求其次揀已知比較後生嘅名字，最後先用 "female" 關鍵字兜底。
+    // 呢個做法可以減少要靠谷 pitch 先扮到後生聲，避免出現假聲/尖聲。
+    preferredFemaleVoice =
+        enVoices.find(v => /(natural|online|premium|enhanced)/i.test(v.name) && /(female|zira|jenny|aria|emma|ana|libby|maisie|sonia|olivia)/i.test(v.name))
+        || enVoices.find(v => /(samantha|zoe|zira|susan|karen|moira|tessa|fiona|kate|ava|serena|jenny|aria|emma|libby|maisie|sonia|olivia)/i.test(v.name))
+        || enVoices.find(v => /female/i.test(v.name))
+        || enVoices.find(v => /(victoria)/i.test(v.name));
+
+    // 普通話聲線 (zh-CN)
+    let cnVoices = voices.filter(v => v.lang && v.lang.toLowerCase().indexOf('zh-cn') === 0);
+    if (cnVoices.length === 0) {
+        cnVoices = voices.filter(v => v.lang && v.lang.toLowerCase() === 'zh' || (v.lang && v.lang.toLowerCase().indexOf('cmn') === 0));
+    }
+    preferredMandarinVoice = cnVoices.find(v => /female/i.test(v.name)) || cnVoices[0] || null;
+
+    // 廣東話聲線 (zh-HK)
+    let hkVoices = voices.filter(v => v.lang && v.lang.toLowerCase().indexOf('zh-hk') === 0);
+    preferredCantoneseVoice = hkVoices.find(v => /female/i.test(v.name)) || hkVoices[0] || null;
+}
+loadDialogueVoices();
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = loadDialogueVoices;
+}
+
+function isSpeechSynthesisSupported() {
+    return 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
+}
+
+function getCapacitorTTSPlugin() {
+    return window.Capacitor?.Plugins?.TextToSpeech || null;
+}
+
+function stopSpeaking() {
+    const ttsPlugin = getCapacitorTTSPlugin();
+    if (ttsPlugin && typeof ttsPlugin.stop === 'function') {
+        ttsPlugin.stop().catch(() => {});
+    }
+    if (window.speechSynthesis && typeof window.speechSynthesis.cancel === 'function') {
+        window.speechSynthesis.cancel();
+    }
+}
+
+document.addEventListener('touchstart', () => {
+    if (isSpeechSynthesisSupported()) {
+        window.speechSynthesis.getVoices();
+    }
+}, { once: true });
+
+document.addEventListener('click', () => {
+    if (isSpeechSynthesisSupported()) {
+        window.speechSynthesis.getVoices();
+    }
+}, { once: true });
+
+// 根據角色名稱取得對應聲線設定 (Alice / Bob 扮 5 歲細路聲，Server 用成人男聲)
+// 呢度刻意用好細嘅 pitch/rate 調整 (最多加 10-15%)，因為將 pitch 谷得太盡
+// 會令把聲變得好假、好尖 (chipmunk 效果)。反而應該優先揀一把本身已經
+// 比較後生/清脆嘅底層聲線，先至加少少音調同語速，聽落先似真人細路聲。
+function getSpeakerVoiceOptions(speakerName) {
+    if (speakerName === 'Bob') {
+        // Bob 用普通成年男聲，若有第二把男聲則優先使用，否則回退到第一把男聲
+        if (preferredMaleVoiceAlt) return { voice: preferredMaleVoiceAlt, pitch: 1, rate: 1 };
+        if (preferredMaleVoice) return { voice: preferredMaleVoice, pitch: 1, rate: 1 };
+        return { pitch: 1, rate: 1 };
+    }
+    if (speakerName === 'Server') {
+        // Server 係另一把成年男聲，保持成人口音和音調
+        if (preferredMaleVoice) return { voice: preferredMaleVoice, pitch: 1, rate: 1 };
+        if (preferredMaleVoiceAlt) return { voice: preferredMaleVoiceAlt, pitch: 1, rate: 1 };
+        return { pitch: 1, rate: 1 };
+    }
+    // Alice 及其他角色：使用正常女聲
+    if (preferredFemaleVoice) return { voice: preferredFemaleVoice, pitch: 1, rate: 1 };
+    return { pitch: 1, rate: 1 };
+}
+
+// 普通話/廣東話按鈕統一用嚟揀聲線嘅小工具
+function getChineseVoiceOptions(langCode) {
+    if (langCode === 'zh-CN') {
+        return preferredMandarinVoice ? { voice: preferredMandarinVoice, pitch: 1 } : { pitch: 1 };
+    }
+    if (langCode === 'zh-HK') {
+        return preferredCantoneseVoice ? { voice: preferredCantoneseVoice, pitch: 1 } : { pitch: 1 };
+    }
+    return {};
+}
+
+// 核心功能：單音播放控制函數
+function speakText(text, langCode, callback, voiceOptions) {
+    if (!text) {
+        if (callback) callback();
+        return;
+    }
+
+    const locale = langCode || 'en-US';
+    const rate = (voiceOptions && typeof voiceOptions.rate === 'number') ? voiceOptions.rate : 1.0;
+    const pitch = (voiceOptions && typeof voiceOptions.pitch === 'number') ? voiceOptions.pitch : 1.0;
+
+    const ttsPlugin = getCapacitorTTSPlugin();
+    if (ttsPlugin && typeof ttsPlugin.speak === 'function') {
+        ttsPlugin.speak({ text, language: locale, rate, pitch })
+            .then(() => { if (callback) callback(); })
+            .catch((err) => { console.warn('Capacitor TextToSpeech failed', err); if (callback) callback(); });
+        return;
+    }
+
+    if (navigator.tts && typeof navigator.tts.speak === 'function') {
+        navigator.tts.speak({ text, locale, rate },
+            () => { if (callback) callback(); },
+            err => { console.warn('navigator.tts speak failed', err); if (callback) callback(); }
+        );
+        return;
+    }
+
+    if (window.plugins && window.plugins.tts && typeof window.plugins.tts.speak === 'function') {
+        window.plugins.tts.speak({ text, locale, rate },
+            () => { if (callback) callback(); },
+            err => { console.warn('plugins.tts speak failed', err); if (callback) callback(); }
+        );
+        return;
+    }
+
+    if (!isSpeechSynthesisSupported()) {
+        console.warn('Speech synthesis not supported in this environment', text, langCode);
+        if (callback) callback();
+        return;
+    }
+
+    let utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = locale;
+    if (voiceOptions) {
+        if (voiceOptions.voice) utterance.voice = voiceOptions.voice;
+        if (typeof voiceOptions.pitch === 'number') utterance.pitch = voiceOptions.pitch;
+        if (typeof voiceOptions.rate === 'number') utterance.rate = voiceOptions.rate;
+    }
+    if (callback) {
+        utterance.onend = callback;
+    }
+
+    try {
+        if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+        }
+        window.speechSynthesis.speak(utterance);
+    } catch (e) {
+        console.warn('Web Speech speak failed', e);
+        if (callback) callback();
+    }
+}
+
+// 核心功能：連讀四合一（播完一個等 1 秒播下一個）
+function speakAllSequence(engText, chiText) {
+    stopSpeaking(); // 先清空目前的語音
+
+    // 第一步：讀英文
+    speakText(engText, 'en-US', () => {
+        // 英文讀完後，等待 1000 毫秒 (1秒)
+        setTimeout(() => {
+            // 第二步：讀普通話
+            speakText(chiText, 'zh-CN', () => {
+                // 普通話讀完後，再等待 1000 毫秒 (1秒)
+                setTimeout(() => {
+                    // 第三步：讀粵語
+                    speakText(chiText, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+                }, 1000);
+            }, getChineseVoiceOptions('zh-CN'));
+        }, 1000);
+    });
+}
+
+// 渲染生字頁面
+function displayVocabItems(topic) {
+  let vocabItemContainer = document.getElementById('vocab-items');
+  vocabItemContainer.innerHTML = '';
+
+  vocab.forEach(item => {
+    if (item.topic === topic) {
+      let vocabItem = document.createElement('div');
+      vocabItem.classList.add('vocab-item');
+      vocabItem.innerHTML = `<span style="font-size:36px;">${item.emoji}</span><p style="font-size:18px;"><b>${item.englishName}</b></p><p style="color:#555;">${item.chineseName}</p>`;
+
+      // 按鈕容器
+      let btnGroup = document.createElement('div');
+      btnGroup.classList.add('speak-btn-group');
+
+      // 1. 🎵 三語連讀按鈕 (新功能：發音完成一列後停頓1秒)
+      let btnAll = document.createElement('button');
+      btnAll.classList.add('vocab-speak-btn', 'btn-all');
+      btnAll.innerHTML = '🎵 廣播：三語連讀';
+      btnAll.addEventListener('click', () => speakAllSequence(item.englishName, item.chineseName));
+
+      // 2. 🇺🇸 英語按鈕
+      let btnEn = document.createElement('button');
+      btnEn.classList.add('vocab-speak-btn', 'btn-en');
+      btnEn.innerHTML = '🇺🇸 Speak English';
+      btnEn.addEventListener('click', () => {
+          stopSpeaking();
+          speakText(item.englishName, 'en-US');
+      });
+
+      // 3. 🇨🇳 普通話按鈕 (Mandarin，明確揀普通話聲線)
+      let btnPnh = document.createElement('button');
+      btnPnh.classList.add('vocab-speak-btn', 'btn-pnh');
+      btnPnh.innerHTML = '🇨🇳 讀普通話';
+      btnPnh.addEventListener('click', () => {
+          stopSpeaking();
+          speakText(item.chineseName, 'zh-CN', null, getChineseVoiceOptions('zh-CN'));
+      });
+
+      // 4. 🇭🇰 粵語按鈕
+      let btnCanton = document.createElement('button');
+      btnCanton.classList.add('vocab-speak-btn', 'btn-canton');
+      btnCanton.innerHTML = '🇭🇰 講廣東話';
+      btnCanton.addEventListener('click', () => {
+          stopSpeaking();
+          speakText(item.chineseName, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+      });
+
+      // 按順序加入卡片
+      btnGroup.appendChild(btnAll);
+      btnGroup.appendChild(btnEn);
+      btnGroup.appendChild(btnPnh);
+      btnGroup.appendChild(btnCanton);
+      vocabItem.appendChild(btnGroup);
+
+      vocabItemContainer.appendChild(vocabItem);
+    }
+  });
+}
+
+// 將對話逐句拆開成陣列，每項有：原句(帶角色名)、清理過嘅句子、角色名
+// list view 同 step view 都共用呢個陣列，唔使拆兩次
+function parseDialogueSentences(currentDiag) {
+  let rawSentences = currentDiag.script.split('<br>');
+  let parsed = [];
+
+  rawSentences.forEach((rawSentence, index) => {
+      if (rawSentence.trim() === '') return;
+
+      let speakerMatch = rawSentence.match(/^([A-Za-z]+)/);
+      let speakerName = speakerMatch ? speakerMatch[1] : null;
+
+      let cleanSentence = rawSentence
+          .replace(/^[A-Za-z]+[^:]*:\s*/, '')
+          .replace(/[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]/g, '');
+
+      if (cleanSentence.trim() === '') return;
+
+      parsed.push({ index, rawSentence, cleanSentence, speakerName });
+  });
+
+  return parsed;
+}
+
+// 播放某一句 (list view 同 step view 都用呢個)，順便換返配對嘅圖
+function practiceSentence(currentDiag, dialogueImage, sentenceItem) {
+  stopSpeaking();
+  dialoguePlayToken++; // 令連播模式失效，避免同呢句練習撞聲
+
+  if (currentDiag.imageSegments) {
+      let segment = currentDiag.imageSegments.find(s => sentenceItem.index >= s.start && sentenceItem.index <= s.end);
+      if (segment) {
+          dialogueImage.src = segment.image;
+          dialogueImage.style.display = 'block';
+      }
+  }
+
+  let voiceOptions = getSpeakerVoiceOptions(sentenceItem.speakerName);
+  speakText(sentenceItem.cleanSentence, 'en-US', null, voiceOptions);
+}
+
+// 播「全文對話」嗰陣，將目前讀緊嘅一句喺 Full List 入面反白顯示
+function highlightSpeakingLine(index) {
+  document.querySelectorAll('.dialogue-line').forEach((el) => el.classList.remove('speaking'));
+  let activeLine = document.querySelector('.dialogue-line[data-sentence-index="' + index + '"]');
+  if (activeLine) {
+      activeLine.classList.add('speaking');
+      activeLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// 清除反白 (播完 / 按停止 / 切換主題時用)
+function clearSpeakingHighlight() {
+  document.querySelectorAll('.dialogue-line').forEach((el) => el.classList.remove('speaking'));
+}
+
+// 全部句子一齊顯示，每句有自己嘅 🔊 練習按鈕
+function renderDialogueListView(currentDiag, dialogueScript, dialogueImage, sentences) {
+  dialogueScript.innerHTML = '';
+
+  sentences.forEach((item) => {
+      let lineDiv = document.createElement('div');
+      lineDiv.className = 'dialogue-line';
+      lineDiv.dataset.sentenceIndex = String(item.index);
+
+      let textSpan = document.createElement('span');
+      textSpan.className = 'dialogue-line-text';
+      textSpan.innerHTML = item.rawSentence;
+
+      let practiceBtn = document.createElement('button');
+      practiceBtn.type = 'button';
+      practiceBtn.className = 'dialogue-line-btn';
+      practiceBtn.innerHTML = '🔊';
+      practiceBtn.setAttribute('aria-label', 'Practise: ' + item.cleanSentence);
+      practiceBtn.addEventListener('click', () => practiceSentence(currentDiag, dialogueImage, item));
+
+      lineDiv.appendChild(textSpan);
+      lineDiv.appendChild(practiceBtn);
+      dialogueScript.appendChild(lineDiv);
+  });
+}
+
+// 逐句練習模式：一次淨係顯示一句，配大大嘅播放掣、進度條，同 上一句/下一句 按鈕
+function renderDialogueStepView(currentDiag, dialogueScript, dialogueImage, sentences, stepIndex) {
+  dialogueScript.innerHTML = '';
+  let stepNavControls = document.getElementById('step-nav-controls');
+  let progressText = document.getElementById('step-progress-text');
+  let prevBtn = document.getElementById('step-prev-btn');
+  let nextBtn = document.getElementById('step-next-btn');
+
+  if (sentences.length === 0) {
+      stepNavControls.style.display = 'none';
+      return;
+  }
+
+  stepNavControls.style.display = 'flex';
+  let total = sentences.length;
+  let item = sentences[stepIndex];
+
+  let card = document.createElement('div');
+  card.className = 'step-card';
+
+  let progressLabel = document.createElement('div');
+  progressLabel.className = 'step-progress-label';
+  progressLabel.innerText = 'Sentence ' + (stepIndex + 1) + ' of ' + total;
+
+  let progressBar = document.createElement('div');
+  progressBar.className = 'step-progress-bar';
+  let progressFill = document.createElement('div');
+  progressFill.className = 'step-progress-fill';
+  progressFill.style.width = Math.round(((stepIndex + 1) / total) * 100) + '%';
+  progressBar.appendChild(progressFill);
+
+  let sentenceText = document.createElement('div');
+  sentenceText.className = 'step-sentence-text';
+  sentenceText.innerHTML = item.rawSentence;
+
+  let bigPlayBtn = document.createElement('button');
+  bigPlayBtn.type = 'button';
+  bigPlayBtn.className = 'step-big-play-btn';
+  bigPlayBtn.innerHTML = '🔊';
+  bigPlayBtn.setAttribute('aria-label', 'Practise: ' + item.cleanSentence);
+  bigPlayBtn.addEventListener('click', () => practiceSentence(currentDiag, dialogueImage, item));
+
+  card.appendChild(progressLabel);
+  card.appendChild(progressBar);
+  card.appendChild(sentenceText);
+  card.appendChild(bigPlayBtn);
+  dialogueScript.appendChild(card);
+
+  // 更新 上一句/下一句 按鈕嘅可用狀態
+  prevBtn.disabled = (stepIndex === 0);
+  nextBtn.disabled = (stepIndex === total - 1);
+  progressText.innerText = (stepIndex + 1) + ' / ' + total;
+
+  // 一去到新嘅一句就自動讀出嚟 (呢個係由 Next/Previous 按鈕觸發，唔算自動播放違規)
+  practiceSentence(currentDiag, dialogueImage, item);
+}
+
+// 根據目前 dialogueViewMode 重新畫返個 dialogue-script 區域
+function renderCurrentDialogueView() {
+  if (!currentDialogueTopic) return;
+  let dialogueScript = document.getElementById('dialogue-script');
+  let dialogueImage = document.getElementById('dialogue-image');
+  let listBtn = document.getElementById('mode-list-btn');
+  let stepBtn = document.getElementById('mode-step-btn');
+  let stepNavControls = document.getElementById('step-nav-controls');
+
+  if (dialogueViewMode === 'step') {
+      listBtn.classList.remove('mode-btn-active');
+      stepBtn.classList.add('mode-btn-active');
+      renderDialogueStepView(currentDialogueTopic, dialogueScript, dialogueImage, currentDialogueSentences, dialogueStepIndex);
+  } else {
+      stepBtn.classList.remove('mode-btn-active');
+      listBtn.classList.add('mode-btn-active');
+      stepNavControls.style.display = 'none';
+      renderDialogueListView(currentDialogueTopic, dialogueScript, dialogueImage, currentDialogueSentences);
+  }
+}
+
+// 「Full List」／「Step-by-Step Practice」切換按鈕 (只需要綁定一次)
+document.getElementById('mode-list-btn').addEventListener('click', () => {
+  stopSpeaking();
+  dialoguePlayToken++;
+  dialogueViewMode = 'list';
+  renderCurrentDialogueView();
+});
+
+document.getElementById('mode-step-btn').addEventListener('click', () => {
+  stopSpeaking();
+  dialoguePlayToken++;
+  dialogueViewMode = 'step';
+  dialogueStepIndex = 0;
+  renderCurrentDialogueView();
+});
+
+document.getElementById('step-prev-btn').addEventListener('click', () => {
+  if (dialogueStepIndex > 0) {
+      dialogueStepIndex--;
+      renderCurrentDialogueView();
+  }
+});
+
+document.getElementById('step-next-btn').addEventListener('click', () => {
+  if (dialogueStepIndex < currentDialogueSentences.length - 1) {
+      dialogueStepIndex++;
+      renderCurrentDialogueView();
+  }
+});
+
+// 顯示並準備播放對話 (已根據 image_3.png 的邏輯進行更新)
+function displayDialogueScript(dialogueId) {
+  let dialogueScript = document.getElementById('dialogue-script');
+  let dialogueImage = document.getElementById('dialogue-image');
+  let detailTitle = document.getElementById('dialogue-detail-title');
+  dialogueScript.innerHTML = '';
+
+  // 切換到新主題，令舊有嘅逐句朗讀迴圈失效
+  dialoguePlayToken++;
+
+  let currentDiag = dialogue.find(d => d.id === dialogueId);
+  if (currentDiag) {
+      detailTitle.innerText = currentDiag.title;
+
+      // 每次揀新主題，重置逐句練習狀態，並記低呢個主題嘅資料同拆好嘅句子
+      currentDialogueTopic = currentDiag;
+      currentDialogueSentences = parseDialogueSentences(currentDiag);
+      dialogueStepIndex = 0;
+      renderCurrentDialogueView();
+
+      // 顯示主題封面圖 (如果有設定)，冇圖就隱藏返個 <img>
+      if (currentDiag.coverImage) {
+          dialogueImage.src = currentDiag.coverImage;
+          dialogueImage.style.display = 'block';
+      } else {
+          dialogueImage.removeAttribute('src');
+          dialogueImage.style.display = 'none';
+      }
+
+      let playButton = document.getElementById('play-dialogue-btn');
+      let newPlayButton = playButton.cloneNode(true);
+      playButton.parentNode.replaceChild(newPlayButton, playButton);
+
+
+      newPlayButton.addEventListener('click', () => {
+          stopSpeaking(); // 先清空目前的語音
+          dialoguePlayToken++; // 每次重新播放都用新 token，令之前嘅迴圈失效
+          let myToken = dialoguePlayToken;
+
+          // 自動切換去 Full List 模式，等小朋友可以睇住成段對話、跟住反白嘅句子一齊讀
+          dialogueViewMode = 'list';
+          dialogueStepIndex = 0;
+          renderCurrentDialogueView();
+
+          // 根據 image_3.png，使用 <br> 將整個對話切分成每一句子的陣列
+          let sentences = currentDiag.script.split('<br>');
+          let sentenceIndex = 0;
+          let lastShownImage = null;
+
+          // 根據目前讀緊嘅句子索引，揾返對應要顯示嘅圖片 (如果呢個主題有設定)
+          function updateImageForSentence(index) {
+              if (!currentDiag.imageSegments) return;
+              let segment = currentDiag.imageSegments.find(s => index >= s.start && index <= s.end);
+              if (segment && segment.image !== lastShownImage) {
+                  dialogueImage.src = segment.image;
+                  dialogueImage.style.display = 'block';
+                  lastShownImage = segment.image;
+              }
+          }
+
+          function readEnglishSentence() {
+              // 若話題已經切換或已按停止，token 會唔同，即刻停止朗讀
+              if (myToken !== dialoguePlayToken) return;
+
+              if (sentenceIndex < sentences.length) {
+                  let rawSentence = sentences[sentenceIndex];
+
+                  // 根據目前句子更新配圖，同喺 Full List 反白目前呢句
+                  updateImageForSentence(sentenceIndex);
+                  highlightSpeakingLine(sentenceIndex);
+
+                  // 先取得角色名稱 (如 Bob / Alice / Server)，再清理句子
+                  let speakerMatch = rawSentence.match(/^([A-Za-z]+)/);
+                  let speakerName = speakerMatch ? speakerMatch[1] : null;
+
+                  // 清理句子：移除人名+角色 Emoji 開頭 (如 "Alice 👧: ") 以及可能干擾發音的 Emoji 符號
+                  let cleanSentence = rawSentence
+                      .replace(/^[A-Za-z]+[^:]*:\s*/, '') // 移除角色名與角色 Emoji
+                      .replace(/[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]/g, ''); // 移除其餘 Emoji
+
+                  // 如果清理後是空行，直接跳過讀下一句
+                  if (cleanSentence.trim() === '') {
+                      sentenceIndex++;
+                      readEnglishSentence();
+                      return;
+                  }
+
+                  // 根據角色決定聲線 (Alice/Bob 扮 5 歲細路聲，Server 用成人男聲)
+                  let voiceOptions = getSpeakerVoiceOptions(speakerName);
+
+                  // 播放當前句子
+                  speakText(cleanSentence, 'en-US', () => {
+                      if (myToken !== dialoguePlayToken) return; // 停止或切換咗就唔再排下一句
+                      setTimeout(() => {
+                          if (myToken !== dialoguePlayToken) return;
+                          // 等待 1 秒後讀下一句
+                          sentenceIndex++;
+                          readEnglishSentence();
+                      }, 1000);
+                  }, voiceOptions);
+              } else {
+                  // 讀完成個對話，清除反白，並回復顯示封面圖
+                  clearSpeakingHighlight();
+                  if (currentDiag.coverImage) {
+                      dialogueImage.src = currentDiag.coverImage;
+                      dialogueImage.style.display = 'block';
+                  }
+              }
+          }
+
+          // 開始執行逐句連讀
+          readEnglishSentence();
+      });
+
+      let stopButton = document.getElementById('stop-btn');
+      let newStopButton = stopButton.cloneNode(true);
+      stopButton.parentNode.replaceChild(newStopButton, stopButton);
+
+      newStopButton.addEventListener('click', () => {
+          stopSpeaking();
+          dialoguePlayToken++; // 令目前嘅朗讀迴圈失效
+          clearSpeakingHighlight();
+          // 按停止後回復顯示封面圖
+          if (currentDiag.coverImage) {
+              dialogueImage.src = currentDiag.coverImage;
+              dialogueImage.style.display = 'block';
+          }
+      });
+  }
+}
+
+/* =========================================================
+   小測驗 (Quiz) 功能
+   - 每個主題有 10 題題庫 (pool)
+   - 每次開始測驗時隨機抽 6 題
+   - 答對顯示 ✅ 及開心音效，並讀出正確答案
+   - 可用「上一題」「下一題」在 6 題之間移動
+   - 完成後顯示總分，滿分顯示可愛貼紙 + 慶祝音效
+   ========================================================= */
+
+let quizSession = {
+    topic: null,
+    questions: [],   // 6 randomly chosen questions for this session
+    currentIndex: 0,
+    answers: []       // parallel array: { selected, correct } or null
+};
+
+function shuffleArray(arr) {
+    let a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// 建立某主題的 10 題題庫 (使用該主題前 10 個生字作為題目本體)
+function buildQuizPool(topic) {
+    let topicItems = vocab.filter(v => v.topic === topic).slice(0, 10);
+    return topicItems.map(item => {
+        let distractorPool = vocab.filter(v => v.topic === topic && v.englishName !== item.englishName);
+        let distractors = shuffleArray(distractorPool).slice(0, 3).map(d => d.englishName);
+        let options = shuffleArray([item.englishName, ...distractors]);
+        return {
+            emoji: item.emoji,
+            chinese: item.chineseName,
+            correct: item.englishName,
+            options: options
+        };
+    });
+}
+
+function startQuiz(topic) {
+    let pool = buildQuizPool(topic);
+    let sixQuestions = shuffleArray(pool).slice(0, 6);
+
+    quizSession = {
+        topic: topic,
+        questions: sixQuestions,
+        currentIndex: 0,
+        answers: new Array(6).fill(null)
+    };
+
+    document.getElementById('quiz-title').innerText = topic + ' 小測驗';
+    document.getElementById('quiz-result-view').style.display = 'none';
+    document.getElementById('quiz-question-view').style.display = 'block';
+
+    showPage('quiz-page');
+    renderQuizQuestion();
+}
+
+document.getElementById('start-quiz-btn').addEventListener('click', () => {
+    if (currentTopic) startQuiz(currentTopic);
+});
+
+function exitQuiz() {
+    stopSpeaking();
+    if (currentTopic) {
+        showPage('vocab-display-page');
+    } else {
+        showPage('vocab-topics-page');
+    }
+}
+
+function renderQuizQuestion() {
+    let idx = quizSession.currentIndex;
+    let q = quizSession.questions[idx];
+    let saved = quizSession.answers[idx];
+
+    document.getElementById('quiz-progress-text').innerText = `問題 ${idx + 1}/6`;
+    document.getElementById('quiz-progress-fill').style.width = (((idx + 1) / 6) * 100) + '%';
+    document.getElementById('quiz-emoji').innerText = q.emoji;
+    document.getElementById('quiz-question-text').innerText = q.chinese + ' 英文是？';
+
+    let optionsContainer = document.getElementById('quiz-options');
+    optionsContainer.innerHTML = '';
+
+    q.options.forEach(optionText => {
+        let btn = document.createElement('button');
+        btn.classList.add('quiz-option-btn');
+        btn.dataset.value = optionText;
+        btn.innerHTML = `<span>${optionText}</span><span class="quiz-mark"></span>`;
+
+        // Restore previous state if this question was already answered (single attempt only)
+        if (saved) {
+            if (optionText === saved.selected) {
+                btn.classList.add(saved.correct ? 'correct' : 'wrong');
+                btn.querySelector('.quiz-mark').innerHTML = saved.correct ? '<span class="tick-anim">✅</span>' : '❌';
+            }
+            // 若第一次作答錯誤，揭曉正確答案
+            if (!saved.correct && optionText === q.correct) {
+                btn.classList.add('correct');
+                btn.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
+            }
+            btn.classList.add('disabled');
+        }
+
+        btn.addEventListener('click', () => handleQuizAnswer(optionText, btn));
+        optionsContainer.appendChild(btn);
+    });
+
+    // Nav buttons state
+    document.getElementById('quiz-prev-btn').disabled = (idx === 0);
+    let nextBtn = document.getElementById('quiz-next-btn');
+    nextBtn.innerText = (idx === 5) ? '完成測驗 🏁' : '下一題 ➡️';
+    nextBtn.disabled = false;
+}
+
+function handleQuizAnswer(optionText, btnEl) {
+    let idx = quizSession.currentIndex;
+    let q = quizSession.questions[idx];
+
+    // 每題只計第一次作答，答咗就鎖定
+    if (quizSession.answers[idx]) return;
+
+    let isCorrect = (optionText === q.correct);
+
+    if (isCorrect) {
+        quizSession.answers[idx] = { selected: optionText, correct: true };
+        btnEl.classList.add('correct');
+        btnEl.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
+        playHappySound();
+        // 答對後讀出正確答案 (英文生字)，等小朋友聽多次加深印象
+        stopSpeaking();
+        setTimeout(() => {
+            speakText(q.correct, 'en-US');
+        }, 300);
+    } else {
+        quizSession.answers[idx] = { selected: optionText, correct: false };
+        btnEl.classList.add('wrong');
+        btnEl.querySelector('.quiz-mark').innerHTML = '❌';
+
+        // 第一次就答錯，呢題唔會計入總分，並揭曉正確答案
+        document.querySelectorAll('#quiz-options .quiz-option-btn').forEach(b => {
+            if (b.dataset.value === q.correct) {
+                b.classList.add('correct');
+                b.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
+            }
+        });
+    }
+
+    // 作答後鎖定所有選項 (單次作答)
+    document.querySelectorAll('#quiz-options .quiz-option-btn').forEach(b => b.classList.add('disabled'));
+}
+
+document.getElementById('quiz-next-btn').addEventListener('click', () => {
+    if (quizSession.currentIndex === 5) {
+        showQuizResult();
+    } else {
+        quizSession.currentIndex++;
+        renderQuizQuestion();
+    }
+});
+
+document.getElementById('quiz-prev-btn').addEventListener('click', () => {
+    if (quizSession.currentIndex > 0) {
+        quizSession.currentIndex--;
+        renderQuizQuestion();
+    }
+});
+
+function showQuizResult() {
+    let score = quizSession.answers.filter(a => a && a.correct).length;
+
+    document.getElementById('quiz-question-view').style.display = 'none';
+    document.getElementById('quiz-result-view').style.display = 'block';
+    document.getElementById('quiz-result-score').innerText = `你答對了 ${score}/6 題`;
+
+    let fullScoreBlock = document.getElementById('quiz-full-score-sticker');
+    let resultEmoji = document.getElementById('quiz-result-emoji');
+
+    if (score === 6) {
+        fullScoreBlock.style.display = 'block';
+        resultEmoji.innerText = '🏆';
+        playFanfareSound();
+    } else {
+        fullScoreBlock.style.display = 'none';
+        resultEmoji.innerText = score >= 4 ? '🎉' : '💪';
+    }
+}
+
+document.getElementById('quiz-retry-btn').addEventListener('click', () => {
+    if (quizSession.topic) startQuiz(quizSession.topic);
+});
+
+/* ---------- 音效 (使用 Web Audio API 產生，避免依賴外部音檔，方便打包成 App) ---------- */
+let audioCtx = null;
+function getAudioCtx() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+
+function playTone(freq, startTime, duration, ctx, gainValue) {
+    let osc = ctx.createOscillator();
+    let gainNode = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gainNode.gain.setValueAtTime(0.0001, startTime);
+    gainNode.gain.exponentialRampToValueAtTime(gainValue || 0.25, startTime + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+}
+
+// 開心的兩音上揚音效 (答對時)
+function playHappySound() {
+    try {
+        let ctx = getAudioCtx();
+        let now = ctx.currentTime;
+        playTone(880, now, 0.14, ctx);
+        playTone(1318.5, now + 0.12, 0.22, ctx);
+    } catch (e) { /* audio not available */ }
+}
+
+// 滿分小號角音效 (完成測驗滿分時)
+function playFanfareSound() {
+    try {
+        let ctx = getAudioCtx();
+        let now = ctx.currentTime;
+        let notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((f, i) => playTone(f, now + i * 0.15, 0.3, ctx, 0.2));
+    } catch (e) { /* audio not available */ }
+}
+
+/* =========================================================
+   隨機/綜合小測驗 (Mixed Quiz: 聆聽 Listening / 閱讀 Reading)
+   - 題目來自所有生字主題 (全部 vocab)
+   - 每次隨機抽 8 題
+   - 聆聽模式：播放英文讀音 + 顯示英文文字，選項為 emoji + 英文
+   - 閱讀模式：顯示英文文字並讀出英文題目，選項為 emoji + 中文，答對後讀出中文答案
+   ========================================================= */
+
+let mixedQuizSession = {
+    type: null,       // 'listening' | 'reading'
+    questions: [],
+    currentIndex: 0,
+    answers: []
+};
+
+// 取得不重複的生字池 (以英文名稱去重)
+function getUniqueVocabPool() {
+    let seen = {};
+    let result = [];
+    vocab.forEach(v => {
+        if (!seen[v.englishName]) {
+            seen[v.englishName] = true;
+            result.push(v);
+        }
+    });
+    return result;
+}
+
+// 建立 8 題隨機題目，每題含 1 個正確答案 + 3 個干擾項 (皆來自全部主題)
+function buildMixedQuizQuestions(count) {
+    let pool = getUniqueVocabPool();
+    let chosen = shuffleArray(pool).slice(0, count);
+    return chosen.map(target => {
+        let distractorPool = pool.filter(v => v.englishName !== target.englishName);
+        let distractors = shuffleArray(distractorPool).slice(0, 3);
+        let optionItems = shuffleArray([target, ...distractors]);
+        return { target: target, optionItems: optionItems };
+    });
+}
+
+document.getElementById('mix-quiz-btn').addEventListener('click', () => showPage('quiz-mode-page'));
+document.getElementById('listening-quiz-btn').addEventListener('click', () => startMixedQuiz('listening'));
+document.getElementById('reading-quiz-btn').addEventListener('click', () => startMixedQuiz('reading'));
+
+function startMixedQuiz(type) {
+    let questions = buildMixedQuizQuestions(8);
+
+    mixedQuizSession = {
+        type: type,
+        questions: questions,
+        currentIndex: 0,
+        answers: new Array(8).fill(null)
+    };
+
+    document.getElementById('mixed-quiz-title').innerText = (type === 'listening') ? 'Listening Quiz 🔊' : 'Word Matching Quiz 📖';
+    document.getElementById('mixed-quiz-result-view').style.display = 'none';
+    document.getElementById('mixed-quiz-question-view').style.display = 'block';
+
+    showPage('mixed-quiz-page');
+    renderMixedQuizQuestion();
+}
+
+function exitMixedQuiz() {
+    stopSpeaking();
+    showPage('quiz-mode-page');
+}
+
+function renderMixedQuizQuestion() {
+    let idx = mixedQuizSession.currentIndex;
+    let q = mixedQuizSession.questions[idx];
+    let saved = mixedQuizSession.answers[idx];
+    let type = mixedQuizSession.type;
+
+    document.getElementById('mixed-quiz-progress-text').innerText = `問題 ${idx + 1}/8`;
+    document.getElementById('mixed-quiz-progress-fill').style.width = (((idx + 1) / 8) * 100) + '%';
+
+    let audioRow = document.getElementById('mixed-quiz-audio-row');
+    let emojiEl = document.getElementById('mixed-quiz-emoji');
+    let questionTextEl = document.getElementById('mixed-quiz-question-text');
+    let subEl = document.getElementById('mixed-quiz-question-sub');
+    let optionsContainer = document.getElementById('mixed-quiz-options');
+    optionsContainer.innerHTML = '';
+
+    // 聆聽同閱讀模式都會顯示「再聽一次」按鈕，方便隨時重播英文讀音
+    audioRow.style.display = 'block';
+
+    if (type === 'listening') {
+        // 用耳機圖示代表「聆聽模式」，避免同下面嘅 🔊 再聽一次按鈕重疊/重複
+        emojiEl.innerText = '🎧';
+        questionTextEl.style.display = 'none';
+        questionTextEl.innerText = '';
+        subEl.innerText = '聽聽讀音，揀出啱嘅圖示';
+        // 每次顯示新題目時自動播放一次英文讀音
+        stopSpeaking();
+        speakText(q.target.englishName, 'en-US');
+    } else {
+        emojiEl.innerText = '📖';
+        questionTextEl.style.display = 'block';
+        questionTextEl.innerText = q.target.englishName;
+        subEl.innerText = '呢個英文字係咩意思？';
+        // 閱讀模式都會讀出英文題目，等小朋友聽下正確讀音
+        stopSpeaking();
+        speakText(q.target.englishName, 'en-US');
+    }
+
+    q.optionItems.forEach(optionItem => {
+        let btn = document.createElement('button');
+        btn.classList.add('quiz-option-btn');
+        btn.dataset.value = optionItem.englishName;
+        let label = (type === 'listening')
+            ? `${optionItem.emoji} ${optionItem.englishName}`
+            : `${optionItem.emoji} ${optionItem.chineseName}`;
+        btn.innerHTML = `<span>${label}</span><span class="quiz-mark"></span>`;
+
+        // 還原之前作答過的狀態 (每題只計第一次作答)
+        if (saved) {
+            if (optionItem.englishName === saved.selectedName) {
+                btn.classList.add(saved.correct ? 'correct' : 'wrong');
+                btn.querySelector('.quiz-mark').innerHTML = saved.correct ? '<span class="tick-anim">✅</span>' : '❌';
+            }
+            // 若第一次作答錯誤，揭曉正確答案
+            if (!saved.correct && optionItem.englishName === q.target.englishName) {
+                btn.classList.add('correct');
+                btn.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
+            }
+            btn.classList.add('disabled');
+        }
+
+        btn.addEventListener('click', () => handleMixedQuizAnswer(optionItem, btn));
+        optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById('mixed-quiz-prev-btn').disabled = (idx === 0);
+    let nextBtn = document.getElementById('mixed-quiz-next-btn');
+    nextBtn.innerText = (idx === 7) ? '完成測驗 🏁' : '下一題 ➡️';
+}
+
+function handleMixedQuizAnswer(optionItem, btnEl) {
+    let idx = mixedQuizSession.currentIndex;
+    let q = mixedQuizSession.questions[idx];
+
+    // 每題只計第一次作答，答咗就鎖定
+    if (mixedQuizSession.answers[idx]) return;
+
+    let isCorrect = (optionItem.englishName === q.target.englishName);
+
+    if (isCorrect) {
+        mixedQuizSession.answers[idx] = { selectedName: optionItem.englishName, correct: true };
+        btnEl.classList.add('correct');
+        btnEl.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
+        playHappySound();
+
+        // 閱讀模式：答對後讀出正確嘅廣東話答案作為額外回饋
+        if (mixedQuizSession.type === 'reading') {
+            setTimeout(() => {
+                speakText(q.target.chineseName, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+            }, 300);
+        }
+    } else {
+        mixedQuizSession.answers[idx] = { selectedName: optionItem.englishName, correct: false };
+        btnEl.classList.add('wrong');
+        btnEl.querySelector('.quiz-mark').innerHTML = '❌';
+
+        // 第一次就答錯，呢題唔會計入總分，並揭曉正確答案
+        document.querySelectorAll('#mixed-quiz-options .quiz-option-btn').forEach(b => {
+            if (b.dataset.value === q.target.englishName) {
+                b.classList.add('correct');
+                b.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
+            }
+        });
+    }
+
+    // 作答後鎖定所有選項 (單次作答)
+    document.querySelectorAll('#mixed-quiz-options .quiz-option-btn').forEach(b => b.classList.add('disabled'));
+}
+
+document.getElementById('mixed-quiz-replay-btn').addEventListener('click', () => {
+    let q = mixedQuizSession.questions[mixedQuizSession.currentIndex];
+    if (!q) return;
+    stopSpeaking();
+    speakText(q.target.englishName, 'en-US');
+});
+
+document.getElementById('mixed-quiz-next-btn').addEventListener('click', () => {
+    if (mixedQuizSession.currentIndex === 7) {
+        showMixedQuizResult();
+    } else {
+        mixedQuizSession.currentIndex++;
+        renderMixedQuizQuestion();
+    }
+});
+
+document.getElementById('mixed-quiz-prev-btn').addEventListener('click', () => {
+    if (mixedQuizSession.currentIndex > 0) {
+        mixedQuizSession.currentIndex--;
+        renderMixedQuizQuestion();
+    }
+});
+
+function showMixedQuizResult() {
+    stopSpeaking();
+    let score = mixedQuizSession.answers.filter(a => a && a.correct).length;
+
+    document.getElementById('mixed-quiz-question-view').style.display = 'none';
+    document.getElementById('mixed-quiz-result-view').style.display = 'block';
+    document.getElementById('mixed-quiz-result-score').innerText = `你答對了 ${score}/8 題`;
+
+    let fullScoreBlock = document.getElementById('mixed-quiz-full-score-sticker');
+    let resultEmoji = document.getElementById('mixed-quiz-result-emoji');
+
+    if (score === 8) {
+        fullScoreBlock.style.display = 'block';
+        resultEmoji.innerText = '🏆';
+        playFanfareSound();
+    } else {
+        fullScoreBlock.style.display = 'none';
+        resultEmoji.innerText = score >= 5 ? '🎉' : '💪';
+    }
+}
+
+document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => {
+    if (mixedQuizSession.type) startMixedQuiz(mixedQuizSession.type);
+});
+</script>
+</body>
+</html>
