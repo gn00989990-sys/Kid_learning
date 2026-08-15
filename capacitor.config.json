@@ -1,7 +1,7 @@
 {
   "appId": "com.fafa.kidlearning",
   "appName": "Kidlearning",
-  "webDir": "ios/App/App/public",
+  "webDir": "web",
   "bundledWebRuntime": true,
   "server": {
     "androidScheme": "https"
