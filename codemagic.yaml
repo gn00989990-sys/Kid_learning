@@ -31,6 +31,25 @@ workflows:
           fi
           npm install @capacitor/core @capacitor/ios @capacitor/cli @capacitor-community/text-to-speech --save-exact
 
+      - name: Debug - inspect config and directory before sync
+        script: |
+          echo "--- pwd ---"
+          pwd
+          echo "--- repo root listing ---"
+          ls -la
+          echo "--- capacitor.config.json content ---"
+          cat capacitor.config.json || echo "MISSING capacitor.config.json"
+          echo "--- any other capacitor config files? ---"
+          find . -maxdepth 2 -iname "capacitor.config.*" -not -path "*/node_modules/*"
+          echo "--- ios/App listing ---"
+          ls -la ios/App || echo "MISSING ios/App"
+          echo "--- ios/App/App listing ---"
+          ls -la ios/App/App || echo "MISSING ios/App/App"
+          echo "--- ios/App/App/public listing ---"
+          ls -la ios/App/App/public || echo "MISSING ios/App/App/public"
+          echo "--- installed capacitor cli version ---"
+          npx cap --version || true
+
       - name: Sync Capacitor (generates capacitor.js + plugin JS into ios/App/App/public, updates Podfile)
         script: |
           npx cap sync ios
