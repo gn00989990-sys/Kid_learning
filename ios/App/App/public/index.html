@@ -875,6 +875,7 @@
             <div class="quiz-emoji" id="quiz-emoji">🍎</div>
             <div class="quiz-question-text" id="quiz-question-text">這是什麼？</div>
             <div class="quiz-question-sub">請選擇正確的英文答案</div>
+            <button class="quiz-audio-replay-btn" id="quiz-replay-btn">🔊 再聽一次</button>
             <div class="quiz-options" id="quiz-options"></div>
             <div class="quiz-nav-row">
                 <button class="quiz-nav-btn" id="quiz-prev-btn">⬅️ 上一題</button>
@@ -1372,6 +1373,58 @@ let preferredChildVoice = null;     // 裝置若有真正嘅童聲/角色聲，�
 let preferredMandarinVoice = null;
 let preferredCantoneseVoice = null;
 
+// Capacitor 原生 TTS 插件嘅聲線索引 (手機上用呢套，因為插件唔接受完整 voice 物件，
+// 只接受 getSupportedVoices() 陣列入面嘅索引數字)
+let capMaleVoiceIndex = null;
+let capMaleVoiceAltIndex = null;
+let capFemaleVoiceIndex = null;
+let capMandarinVoiceIndex = null;
+let capCantoneseVoiceIndex = null;
+
+async function loadCapacitorVoices() {
+    const ttsPlugin = getCapacitorTTSPlugin();
+    if (!ttsPlugin || typeof ttsPlugin.getSupportedVoices !== 'function') return;
+    try {
+        const result = await ttsPlugin.getSupportedVoices();
+        const voices = (result && result.voices) || [];
+
+        let maleNamePattern = /(daniel|fred|alex|david|mark|tom|thomas|james|george|guy|ryan|aaron|liam|oliver|arthur|male)/i;
+        let femaleNamePattern = /(samantha|zoe|zira|susan|karen|moira|tessa|fiona|kate|ava|serena|jenny|aria|emma|libby|maisie|sonia|olivia|female)/i;
+
+        let enVoicesIdx = [];
+        voices.forEach((v, i) => {
+            if (v.lang && v.lang.toLowerCase().indexOf('en') === 0) enVoicesIdx.push(i);
+        });
+
+        let maleIdx = enVoicesIdx.filter(i => maleNamePattern.test(voices[i].name) && !/female/i.test(voices[i].name));
+        capMaleVoiceIndex = (typeof maleIdx[0] === 'number') ? maleIdx[0] : (enVoicesIdx[0] ?? null);
+        capMaleVoiceAltIndex = (typeof maleIdx[1] === 'number') ? maleIdx[1] : capMaleVoiceIndex;
+
+        let femaleIdx = enVoicesIdx.filter(i => femaleNamePattern.test(voices[i].name));
+        capFemaleVoiceIndex = (typeof femaleIdx[0] === 'number') ? femaleIdx[0] : (enVoicesIdx[1] ?? enVoicesIdx[0] ?? null);
+
+        let cnIdx = [];
+        voices.forEach((v, i) => {
+            if (v.lang && v.lang.toLowerCase().indexOf('zh-cn') === 0) cnIdx.push(i);
+        });
+        if (cnIdx.length === 0) {
+            voices.forEach((v, i) => {
+                if (v.lang && (v.lang.toLowerCase() === 'zh' || v.lang.toLowerCase().indexOf('cmn') === 0)) cnIdx.push(i);
+            });
+        }
+        capMandarinVoiceIndex = (typeof cnIdx[0] === 'number') ? cnIdx[0] : null;
+
+        let hkIdx = [];
+        voices.forEach((v, i) => {
+            if (v.lang && v.lang.toLowerCase().indexOf('zh-hk') === 0) hkIdx.push(i);
+        });
+        capCantoneseVoiceIndex = (typeof hkIdx[0] === 'number') ? hkIdx[0] : null;
+    } catch (e) {
+        console.warn('loadCapacitorVoices failed', e);
+    }
+}
+loadCapacitorVoices();
+
 function loadDialogueVoices() {
     let voices = window.speechSynthesis.getVoices() || [];
     let enVoices = voices.filter(v => v.lang && v.lang.toLowerCase().indexOf('en') === 0);
@@ -1456,29 +1509,41 @@ document.addEventListener('click', () => {
 // 比較後生/清脆嘅底層聲線，先至加少少音調同語速，聽落先似真人細路聲。
 function getSpeakerVoiceOptions(speakerName) {
     if (speakerName === 'Bob') {
-        // Bob 用普通成年男聲，若有第二把男聲則優先使用，否則回退到第一把男聲
-        if (preferredMaleVoiceAlt) return { voice: preferredMaleVoiceAlt, pitch: 1, rate: 1 };
-        if (preferredMaleVoice) return { voice: preferredMaleVoice, pitch: 1, rate: 1 };
-        return { pitch: 1, rate: 1 };
+        // Bob = 5 歲男孩：揀第一把男聲，音調較高、語速較快，扮童聲
+        let opts = { pitch: 1.28, rate: 1.1 };
+        if (preferredMaleVoice) opts.voice = preferredMaleVoice;
+        if (typeof capMaleVoiceIndex === 'number') opts.capVoiceIndex = capMaleVoiceIndex;
+        return opts;
     }
     if (speakerName === 'Server') {
-        // Server 係另一把成年男聲，保持成人口音和音調
-        if (preferredMaleVoice) return { voice: preferredMaleVoice, pitch: 1, rate: 1 };
-        if (preferredMaleVoiceAlt) return { voice: preferredMaleVoiceAlt, pitch: 1, rate: 1 };
-        return { pitch: 1, rate: 1 };
+        // Server = 餐廳成人男侍應：揀第二把男聲 (若有)，音調較低、語速較慢，聽落成熟啲
+        let opts = { pitch: 0.85, rate: 0.95 };
+        if (preferredMaleVoiceAlt) opts.voice = preferredMaleVoiceAlt;
+        else if (preferredMaleVoice) opts.voice = preferredMaleVoice;
+        if (typeof capMaleVoiceAltIndex === 'number') opts.capVoiceIndex = capMaleVoiceAltIndex;
+        else if (typeof capMaleVoiceIndex === 'number') opts.capVoiceIndex = capMaleVoiceIndex;
+        return opts;
     }
-    // Alice 及其他角色：使用正常女聲
-    if (preferredFemaleVoice) return { voice: preferredFemaleVoice, pitch: 1, rate: 1 };
-    return { pitch: 1, rate: 1 };
+    // Alice 及其他角色：正常女聲，音調略高扮 5 歲女孩
+    let opts = { pitch: 1.15, rate: 1.03 };
+    if (preferredFemaleVoice) opts.voice = preferredFemaleVoice;
+    if (typeof capFemaleVoiceIndex === 'number') opts.capVoiceIndex = capFemaleVoiceIndex;
+    return opts;
 }
 
 // 普通話/廣東話按鈕統一用嚟揀聲線嘅小工具
 function getChineseVoiceOptions(langCode) {
     if (langCode === 'zh-CN') {
-        return preferredMandarinVoice ? { voice: preferredMandarinVoice, pitch: 1 } : { pitch: 1 };
+        let opts = { pitch: 1 };
+        if (preferredMandarinVoice) opts.voice = preferredMandarinVoice;
+        if (typeof capMandarinVoiceIndex === 'number') opts.capVoiceIndex = capMandarinVoiceIndex;
+        return opts;
     }
     if (langCode === 'zh-HK') {
-        return preferredCantoneseVoice ? { voice: preferredCantoneseVoice, pitch: 1 } : { pitch: 1 };
+        let opts = { pitch: 1 };
+        if (preferredCantoneseVoice) opts.voice = preferredCantoneseVoice;
+        if (typeof capCantoneseVoiceIndex === 'number') opts.capVoiceIndex = capCantoneseVoiceIndex;
+        return opts;
     }
     return {};
 }
@@ -1496,7 +1561,11 @@ function speakText(text, langCode, callback, voiceOptions) {
 
     const ttsPlugin = getCapacitorTTSPlugin();
     if (ttsPlugin && typeof ttsPlugin.speak === 'function') {
-        ttsPlugin.speak({ text, language: locale, rate, pitch })
+        const speakOptions = { text, lang: locale, rate, pitch, volume: 1.0 };
+        if (voiceOptions && typeof voiceOptions.capVoiceIndex === 'number') {
+            speakOptions.voice = voiceOptions.capVoiceIndex;
+        }
+        ttsPlugin.speak(speakOptions)
             .then(() => { if (callback) callback(); })
             .catch((err) => { console.warn('Capacitor TextToSpeech failed', err); if (callback) callback(); });
         return;
@@ -2011,6 +2080,13 @@ document.getElementById('start-quiz-btn').addEventListener('click', () => {
     if (currentTopic) startQuiz(currentTopic);
 });
 
+document.getElementById('quiz-replay-btn').addEventListener('click', () => {
+    let q = quizSession.questions[quizSession.currentIndex];
+    if (!q) return;
+    stopSpeaking();
+    speakText(q.chinese, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+});
+
 function exitQuiz() {
     stopSpeaking();
     if (currentTopic) {
@@ -2029,6 +2105,10 @@ function renderQuizQuestion() {
     document.getElementById('quiz-progress-fill').style.width = (((idx + 1) / 6) * 100) + '%';
     document.getElementById('quiz-emoji').innerText = q.emoji;
     document.getElementById('quiz-question-text').innerText = q.chinese + ' 英文是？';
+
+    // 每次顯示新題目時自動讀出生字題目 (廣東話)，方便小朋友聽住讀音作答
+    stopSpeaking();
+    speakText(q.chinese, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
 
     let optionsContainer = document.getElementById('quiz-options');
     optionsContainer.innerHTML = '';
