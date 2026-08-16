@@ -1532,17 +1532,19 @@ function getSpeakerVoiceOptions(speakerName) {
 }
 
 // 普通話/廣東話按鈕統一用嚟揀聲線嘅小工具
+// 注意：呢度刻意冇用 capVoiceIndex (原生插件嘅 voice 索引參數)。
+// 因為喺實機測試發現，即使裝置確認支援某種語言 (isLanguageSupported 回傳 true)，
+// 一旦連埋 voice 索引一齊傳，個別裝置/插件版本會揀錯聲線 (例如撳普通話但讀出廣東話)。
+// 純粹靠 lang 呢個標準 BCP-47 參數，交返俾裝置原生 TTS 引擎揀聲，反而更可靠。
 function getChineseVoiceOptions(langCode) {
     if (langCode === 'zh-CN') {
         let opts = { pitch: 1 };
         if (preferredMandarinVoice) opts.voice = preferredMandarinVoice;
-        if (typeof capMandarinVoiceIndex === 'number') opts.capVoiceIndex = capMandarinVoiceIndex;
         return opts;
     }
     if (langCode === 'zh-HK') {
         let opts = { pitch: 1 };
         if (preferredCantoneseVoice) opts.voice = preferredCantoneseVoice;
-        if (typeof capCantoneseVoiceIndex === 'number') opts.capVoiceIndex = capCantoneseVoiceIndex;
         return opts;
     }
     return {};
@@ -2520,5 +2522,33 @@ document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => 
     if (mixedQuizSession.type) startMixedQuiz(mixedQuizSession.type);
 });
 </script>
+    <button id="tts-debug-btn" style="position:fixed; bottom:10px; right:10px; z-index:9999; width:34px; height:34px; border-radius:50%; border:none; background:#00000055; color:#fff; font-size:16px; opacity:0.5;">🛠️</button>
+    <script>
+    document.getElementById('tts-debug-btn').addEventListener('click', async () => {
+        const ttsPlugin = window.Capacitor?.Plugins?.TextToSpeech;
+        if (!ttsPlugin) { alert('未偵測到原生 TTS 插件 (可能喺瀏覽器打開，用緊 Web Speech API)'); return; }
+        let lines = [];
+        try {
+            const { supported: cnSupported } = await ttsPlugin.isLanguageSupported({ lang: 'zh-CN' });
+            const { supported: hkSupported } = await ttsPlugin.isLanguageSupported({ lang: 'zh-HK' });
+            lines.push('zh-CN supported: ' + cnSupported);
+            lines.push('zh-HK supported: ' + hkSupported);
+        } catch (e) {
+            lines.push('isLanguageSupported error: ' + e);
+        }
+        try {
+            const { voices } = await ttsPlugin.getSupportedVoices();
+            lines.push('--- Chinese voices on device ---');
+            voices.forEach((v, i) => {
+                if (v.lang && v.lang.toLowerCase().indexOf('zh') === 0) {
+                    lines.push(i + ': ' + v.lang + ' - ' + v.name);
+                }
+            });
+        } catch (e) {
+            lines.push('getSupportedVoices error: ' + e);
+        }
+        alert(lines.join('\n'));
+    });
+    </script>
 </body>
 </html>
