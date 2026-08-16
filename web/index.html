@@ -1279,6 +1279,10 @@ function showPage(pageId) {
 
     document.getElementById(pageId).style.display = 'flex';
 
+    // 普通話提示掣淨係喺生字 (vocabulary) 頁面先顯示
+    let helpBtn = document.getElementById('mandarin-help-btn');
+    if (helpBtn) helpBtn.style.display = (pageId === 'vocab-display-page') ? 'block' : 'none';
+
     // 離開頁面時自動停止發音
     stopSpeaking();
     dialoguePlayToken++;
@@ -1569,7 +1573,31 @@ function getChineseVoiceOptions(langCode) {
     return {};
 }
 
+// 記錄有冇顯示過教學提示，同一個 session 內只自動顯示一次，唔會滋擾用戶
+let mandarinHelpAlertShown = false;
+
+// 已知 iOS 系統限制：如果裝置嘅 Apple Intelligence 與 Siri 語言設定咗做
+// 粵語 (廣東話)，讀普通話嗰陣有機會都係讀出廣東話 (呢個係 iOS 本身嘅
+// bug，唔係呢個 App 嘅問題)。只要將裝置語言設定改做「中文（中國大陸）」
+// 或「中文（台灣）」，普通話同廣東話就都會讀得啱。
+function showMandarinHelpAlert() {
+    alert(
+        '💡 小提示：如果普通話掣讀出嚟係廣東話\n\n' +
+        '呢個係 iPhone 系統本身嘅限制，同呢個 App 冇關。解決方法：\n\n' +
+        '前往「設定」App → 「Apple Intelligence 與 Siri」→「語言」，\n' +
+        '揀「中文（中國大陸）」或「中文（台灣）」。\n\n' +
+        '改完之後，普通話同廣東話掣都會讀得啱。'
+    );
+}
+
 async function speakChinese(text, langCode, callback) {
+    // 淨係喺手機原生 App (唔係瀏覽器) 先會出現呢個情況，所以淨係喺有原生
+    // TTS 插件嗰陣先自動顯示提示，而且成個 session 淨係自動顯示一次
+    // (之後用戶隨時都可以撳「普通話提示」掣再睇一次，唔止呢一次)。
+    if (langCode === 'zh-CN' && !mandarinHelpAlertShown && getCapacitorTTSPlugin()) {
+        mandarinHelpAlertShown = true;
+        showMandarinHelpAlert();
+    }
     speakText(text, langCode, callback, getChineseVoiceOptions(langCode));
 }
 
@@ -2514,5 +2542,9 @@ document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => 
     if (mixedQuizSession.type) startMixedQuiz(mixedQuizSession.type);
 });
 </script>
+    <button id="mandarin-help-btn" style="display:none; position:fixed; bottom:12px; right:12px; z-index:9999; padding:8px 14px; border-radius:50px; border:none; background:#00000066; color:#fff; font-size:12px; font-weight:600;">💡 普通話提示</button>
+    <script>
+    document.getElementById('mandarin-help-btn').addEventListener('click', showMandarinHelpAlert);
+    </script>
 </body>
 </html>
