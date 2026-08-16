@@ -1548,6 +1548,37 @@ function getChineseVoiceOptions(langCode) {
     return {};
 }
 
+// 記錄邊種語言已經提示過安裝，避免同一個 session 內重複彈出提示
+let chineseInstallPromptShown = { 'zh-CN': false, 'zh-HK': false };
+
+// 播放普通話/廣東話前，先檢查裝置有冇裝對應嘅語音包。
+// 手機原生 TTS 引擎如果冇裝到指定語言嘅語音包，會靜靜雞用另一種已裝嘅中文聲線代替
+// (呢個就係「撳普通話掣但聽到廣東話」嘅根本原因，並唔係揀聲線嗰段程式碼揀錯，
+// 而係裝置本身冇裝普通話語音包)。呢個函數會偵測到呢個情況，並引導用戶去裝置設定
+// 下載返正確嘅語音包。
+async function speakChinese(text, langCode, callback) {
+    const ttsPlugin = getCapacitorTTSPlugin();
+    if (ttsPlugin && typeof ttsPlugin.isLanguageSupported === 'function') {
+        try {
+            const res = await ttsPlugin.isLanguageSupported({ lang: langCode });
+            if (res && res.supported === false && !chineseInstallPromptShown[langCode]) {
+                chineseInstallPromptShown[langCode] = true;
+                const langName = (langCode === 'zh-CN') ? '普通話 (Mandarin)' : '廣東話 (Cantonese)';
+                alert(
+                    '你部裝置未安裝「' + langName + '」嘅語音包，暫時會用裝置上另一種中文聲線讀出。\n\n' +
+                    '如想聽返正確嘅語音，可以去：設定 App > 輔助功能 (Accessibility) > 朗讀內容 (Spoken Content) > 聲音 (Voices) > 中文，下載「' + langName + '」語音包。'
+                );
+                if (typeof ttsPlugin.openInstall === 'function') {
+                    ttsPlugin.openInstall().catch(() => {});
+                }
+            }
+        } catch (e) {
+            console.warn('isLanguageSupported check failed', e);
+        }
+    }
+    speakText(text, langCode, callback, getChineseVoiceOptions(langCode));
+}
+
 // 核心功能：單音播放控制函數
 function speakText(text, langCode, callback, voiceOptions) {
     if (!text) {
@@ -1624,13 +1655,13 @@ function speakAllSequence(engText, chiText) {
         // 英文讀完後，等待 1000 毫秒 (1秒)
         setTimeout(() => {
             // 第二步：讀普通話
-            speakText(chiText, 'zh-CN', () => {
+            speakChinese(chiText, 'zh-CN', () => {
                 // 普通話讀完後，再等待 1000 毫秒 (1秒)
                 setTimeout(() => {
                     // 第三步：讀粵語
-                    speakText(chiText, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+                    speakChinese(chiText, 'zh-HK');
                 }, 1000);
-            }, getChineseVoiceOptions('zh-CN'));
+            });
         }, 1000);
     });
 }
@@ -1671,7 +1702,7 @@ function displayVocabItems(topic) {
       btnPnh.innerHTML = '🇨🇳 讀普通話';
       btnPnh.addEventListener('click', () => {
           stopSpeaking();
-          speakText(item.chineseName, 'zh-CN', null, getChineseVoiceOptions('zh-CN'));
+          speakChinese(item.chineseName, 'zh-CN');
       });
 
       // 4. 🇭🇰 粵語按鈕
@@ -1680,7 +1711,7 @@ function displayVocabItems(topic) {
       btnCanton.innerHTML = '🇭🇰 講廣東話';
       btnCanton.addEventListener('click', () => {
           stopSpeaking();
-          speakText(item.chineseName, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+          speakChinese(item.chineseName, 'zh-HK');
       });
 
       // 按順序加入卡片
@@ -2084,7 +2115,7 @@ document.getElementById('quiz-replay-btn').addEventListener('click', () => {
     let q = quizSession.questions[quizSession.currentIndex];
     if (!q) return;
     stopSpeaking();
-    speakText(q.chinese, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+    speakChinese(q.chinese, 'zh-HK');
 });
 
 function exitQuiz() {
@@ -2108,7 +2139,7 @@ function renderQuizQuestion() {
 
     // 每次顯示新題目時自動讀出生字題目 (廣東話)，方便小朋友聽住讀音作答
     stopSpeaking();
-    speakText(q.chinese, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+    speakChinese(q.chinese, 'zh-HK');
 
     let optionsContainer = document.getElementById('quiz-options');
     optionsContainer.innerHTML = '';
@@ -2420,7 +2451,7 @@ function handleMixedQuizAnswer(optionItem, btnEl) {
         // 閱讀模式：答對後讀出正確嘅廣東話答案作為額外回饋
         if (mixedQuizSession.type === 'reading') {
             setTimeout(() => {
-                speakText(q.target.chineseName, 'zh-HK', null, getChineseVoiceOptions('zh-HK'));
+                speakChinese(q.target.chineseName, 'zh-HK');
             }, 300);
         }
     } else {
