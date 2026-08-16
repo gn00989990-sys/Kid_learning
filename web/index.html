@@ -1380,6 +1380,8 @@ let capMaleVoiceAltIndex = null;
 let capFemaleVoiceIndex = null;
 let capMandarinVoiceIndex = null;
 let capCantoneseVoiceIndex = null;
+let capMandarinVoiceLang = null;   // 裝置實際回報嘅普通話語言標籤 (例如可能係 'cmn-CN' 而唔係 'zh-CN')
+let capCantoneseVoiceLang = null;  // 裝置實際回報嘅廣東話語言標籤 (例如可能係 'yue-HK' 而唔係 'zh-HK')
 
 async function loadCapacitorVoices() {
     const ttsPlugin = getCapacitorTTSPlugin();
@@ -1403,22 +1405,38 @@ async function loadCapacitorVoices() {
         let femaleIdx = enVoicesIdx.filter(i => femaleNamePattern.test(voices[i].name));
         capFemaleVoiceIndex = (typeof femaleIdx[0] === 'number') ? femaleIdx[0] : (enVoicesIdx[1] ?? enVoicesIdx[0] ?? null);
 
+        // 普通話：先揀 lang 開頭係 'zh-cn' 嘅聲，搵唔到先試 'cmn' (ISO 語言代碼) 或單純 'zh'
         let cnIdx = [];
         voices.forEach((v, i) => {
             if (v.lang && v.lang.toLowerCase().indexOf('zh-cn') === 0) cnIdx.push(i);
         });
         if (cnIdx.length === 0) {
             voices.forEach((v, i) => {
-                if (v.lang && (v.lang.toLowerCase() === 'zh' || v.lang.toLowerCase().indexOf('cmn') === 0)) cnIdx.push(i);
+                if (v.lang && v.lang.toLowerCase().indexOf('cmn') === 0) cnIdx.push(i);
+            });
+        }
+        if (cnIdx.length === 0) {
+            voices.forEach((v, i) => {
+                if (v.lang && v.lang.toLowerCase() === 'zh') cnIdx.push(i);
             });
         }
         capMandarinVoiceIndex = (typeof cnIdx[0] === 'number') ? cnIdx[0] : null;
+        capMandarinVoiceLang = (capMandarinVoiceIndex !== null) ? voices[capMandarinVoiceIndex].lang : null;
 
+        // 廣東話：先揀 'zh-hk'，搵唔到就試 'yue' (廣東話嘅 ISO 語言代碼)
         let hkIdx = [];
         voices.forEach((v, i) => {
             if (v.lang && v.lang.toLowerCase().indexOf('zh-hk') === 0) hkIdx.push(i);
         });
+        if (hkIdx.length === 0) {
+            voices.forEach((v, i) => {
+                if (v.lang && v.lang.toLowerCase().indexOf('yue') === 0) hkIdx.push(i);
+            });
+        }
         capCantoneseVoiceIndex = (typeof hkIdx[0] === 'number') ? hkIdx[0] : null;
+        capCantoneseVoiceLang = (capCantoneseVoiceIndex !== null) ? voices[capCantoneseVoiceIndex].lang : null;
+
+        console.log('[TTS] Mandarin tag on this device:', capMandarinVoiceLang, '| Cantonese tag:', capCantoneseVoiceLang);
     } catch (e) {
         console.warn('loadCapacitorVoices failed', e);
     }
@@ -1532,52 +1550,26 @@ function getSpeakerVoiceOptions(speakerName) {
 }
 
 // 普通話/廣東話按鈕統一用嚟揀聲線嘅小工具
-// 注意：呢度刻意冇用 capVoiceIndex (原生插件嘅 voice 索引參數)。
-// 因為喺實機測試發現，即使裝置確認支援某種語言 (isLanguageSupported 回傳 true)，
-// 一旦連埋 voice 索引一齊傳，個別裝置/插件版本會揀錯聲線 (例如撳普通話但讀出廣東話)。
-// 純粹靠 lang 呢個標準 BCP-47 參數，交返俾裝置原生 TTS 引擎揀聲，反而更可靠。
+// 呢度會揀返裝置上一把「精確」符合語言嘅聲線 (例如 zh-CN 嘅 Tingting)，
+// 用聲線嘅 identifier 嚟揀 (而唔淨係用 lang 字串)，希望可以避開 iOS 18
+// 「Siri 語言設定覆蓋 App 要求嘅語言」呢個已知系統 bug。
 function getChineseVoiceOptions(langCode) {
     if (langCode === 'zh-CN') {
         let opts = { pitch: 1 };
         if (preferredMandarinVoice) opts.voice = preferredMandarinVoice;
+        if (typeof capMandarinVoiceIndex === 'number') opts.capVoiceIndex = capMandarinVoiceIndex;
         return opts;
     }
     if (langCode === 'zh-HK') {
         let opts = { pitch: 1 };
         if (preferredCantoneseVoice) opts.voice = preferredCantoneseVoice;
+        if (typeof capCantoneseVoiceIndex === 'number') opts.capVoiceIndex = capCantoneseVoiceIndex;
         return opts;
     }
     return {};
 }
 
-// 記錄邊種語言已經提示過安裝，避免同一個 session 內重複彈出提示
-let chineseInstallPromptShown = { 'zh-CN': false, 'zh-HK': false };
-
-// 播放普通話/廣東話前，先檢查裝置有冇裝對應嘅語音包。
-// 手機原生 TTS 引擎如果冇裝到指定語言嘅語音包，會靜靜雞用另一種已裝嘅中文聲線代替
-// (呢個就係「撳普通話掣但聽到廣東話」嘅根本原因，並唔係揀聲線嗰段程式碼揀錯，
-// 而係裝置本身冇裝普通話語音包)。呢個函數會偵測到呢個情況，並引導用戶去裝置設定
-// 下載返正確嘅語音包。
 async function speakChinese(text, langCode, callback) {
-    const ttsPlugin = getCapacitorTTSPlugin();
-    if (ttsPlugin && typeof ttsPlugin.isLanguageSupported === 'function') {
-        try {
-            const res = await ttsPlugin.isLanguageSupported({ lang: langCode });
-            if (res && res.supported === false && !chineseInstallPromptShown[langCode]) {
-                chineseInstallPromptShown[langCode] = true;
-                const langName = (langCode === 'zh-CN') ? '普通話 (Mandarin)' : '廣東話 (Cantonese)';
-                alert(
-                    '你部裝置未安裝「' + langName + '」嘅語音包，暫時會用裝置上另一種中文聲線讀出。\n\n' +
-                    '如想聽返正確嘅語音，可以去：設定 App > 輔助功能 (Accessibility) > 朗讀內容 (Spoken Content) > 聲音 (Voices) > 中文，下載「' + langName + '」語音包。'
-                );
-                if (typeof ttsPlugin.openInstall === 'function') {
-                    ttsPlugin.openInstall().catch(() => {});
-                }
-            }
-        } catch (e) {
-            console.warn('isLanguageSupported check failed', e);
-        }
-    }
     speakText(text, langCode, callback, getChineseVoiceOptions(langCode));
 }
 
@@ -2522,33 +2514,5 @@ document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => 
     if (mixedQuizSession.type) startMixedQuiz(mixedQuizSession.type);
 });
 </script>
-    <button id="tts-debug-btn" style="position:fixed; bottom:10px; right:10px; z-index:9999; width:34px; height:34px; border-radius:50%; border:none; background:#00000055; color:#fff; font-size:16px; opacity:0.5;">🛠️</button>
-    <script>
-    document.getElementById('tts-debug-btn').addEventListener('click', async () => {
-        const ttsPlugin = window.Capacitor?.Plugins?.TextToSpeech;
-        if (!ttsPlugin) { alert('未偵測到原生 TTS 插件 (可能喺瀏覽器打開，用緊 Web Speech API)'); return; }
-        let lines = [];
-        try {
-            const { supported: cnSupported } = await ttsPlugin.isLanguageSupported({ lang: 'zh-CN' });
-            const { supported: hkSupported } = await ttsPlugin.isLanguageSupported({ lang: 'zh-HK' });
-            lines.push('zh-CN supported: ' + cnSupported);
-            lines.push('zh-HK supported: ' + hkSupported);
-        } catch (e) {
-            lines.push('isLanguageSupported error: ' + e);
-        }
-        try {
-            const { voices } = await ttsPlugin.getSupportedVoices();
-            lines.push('--- Chinese voices on device ---');
-            voices.forEach((v, i) => {
-                if (v.lang && v.lang.toLowerCase().indexOf('zh') === 0) {
-                    lines.push(i + ': ' + v.lang + ' - ' + v.name);
-                }
-            });
-        } catch (e) {
-            lines.push('getSupportedVoices error: ' + e);
-        }
-        alert(lines.join('\n'));
-    });
-    </script>
 </body>
 </html>
