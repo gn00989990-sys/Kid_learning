@@ -16,9 +16,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // starting the Mobile Ads SDK. This tells Google not to serve personalized/
         // behavioral ads or transmit the advertising identifier (IDFA), and to only
         // return contextual ads suitable for children, per COPPA requirements.
+        // (tagForChildDirectedTreatment is deprecated; ageRestrictedTreatment is the
+        // current replacement per Google's own SDK release notes and examples.)
         // See: https://developers.google.com/admob/ios/targeting#child-directed_setting
-        MobileAds.shared.requestConfiguration.tagForChildDirectedTreatment = true
-        MobileAds.shared.requestConfiguration.maxAdContentRating = MaxAdContentRating.general
+        MobileAds.shared.requestConfiguration.ageRestrictedTreatment = .child
 
         // Override point for customization after application launch.
         MobileAds.shared.start()
