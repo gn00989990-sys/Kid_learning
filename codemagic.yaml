@@ -31,7 +31,7 @@ workflows:
           if [ ! -f package.json ]; then
             npm init -y
           fi
-          npm install @capacitor/core @capacitor/ios @capacitor/cli @capacitor-community/text-to-speech --save-exact
+          npm install @capacitor/core @capacitor/ios @capacitor/cli @capacitor-community/text-to-speech @capacitor-community/admob --save-exact
 
       - name: Sync Capacitor (generates capacitor.js + plugin JS into ios/App/App/public, updates Podfile)
         script: |
