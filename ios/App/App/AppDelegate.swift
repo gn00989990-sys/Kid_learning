@@ -12,6 +12,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let adUnitID2 = "ca-app-pub-2149260055615094/8751581342"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Kids Category compliance: tag all ad requests as child-directed BEFORE
+        // starting the Mobile Ads SDK. This tells Google not to serve personalized/
+        // behavioral ads or transmit the advertising identifier (IDFA), and to only
+        // return contextual ads suitable for children, per COPPA requirements.
+        // See: https://developers.google.com/admob/ios/targeting#child-directed_setting
+        MobileAds.shared.requestConfiguration.tagForChildDirectedTreatment = true
+        MobileAds.shared.requestConfiguration.maxAdContentRating = MaxAdContentRating.general
+
         // Override point for customization after application launch.
         MobileAds.shared.start()
         return true
