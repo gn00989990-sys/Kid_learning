@@ -1283,6 +1283,14 @@ function showPage(pageId) {
     let helpBtn = document.getElementById('mandarin-help-btn');
     if (helpBtn) helpBtn.style.display = (pageId === 'vocab-display-page') ? 'block' : 'none';
 
+    // Banner 廣告淨係喺主頁同生字瀏覽頁顯示，測驗同對話練習期間隱藏，
+    // 減少滋擾小朋友專心學習
+    if (pageId === 'home-page' || pageId === 'vocab-topics-page' || pageId === 'vocab-display-page') {
+        showBannerAd();
+    } else {
+        hideBannerAd();
+    }
+
     // 離開頁面時自動停止發音
     stopSpeaking();
     dialoguePlayToken++;
@@ -1446,6 +1454,92 @@ async function loadCapacitorVoices() {
     }
 }
 loadCapacitorVoices();
+
+// ===== AdMob (banner + interstitial) =====
+// 廣告單元 ID 對應 AdMob 入面已經同呢個 App Store listing 連接好嘅 App 記錄
+const AD_UNIT_BANNER = 'ca-app-pub-2149260055615094/6069577684';
+const AD_UNIT_INTERSTITIAL = 'ca-app-pub-2149260055615094/8751581342';
+
+// 開發/測試階段設 true，用 Google 測試廣告，唔會撞政策問題；
+// 準備正式出街嗰陣記得改返 false
+const AD_TESTING_MODE = true;
+
+let admobReady = false;
+let interstitialLoaded = false;
+
+function getAdMobPlugin() {
+    return window.Capacitor?.Plugins?.AdMob || null;
+}
+
+async function initAdMob() {
+    const AdMob = getAdMobPlugin();
+    if (!AdMob) return; // 瀏覽器入面冇呢個原生插件，正常，唔顯示廣告
+    try {
+        await AdMob.initialize({
+            initializeForTesting: AD_TESTING_MODE
+        });
+        admobReady = true;
+        prepareInterstitial();
+    } catch (e) {
+        console.warn('AdMob initialize failed', e);
+    }
+}
+initAdMob();
+
+async function showBannerAd() {
+    const AdMob = getAdMobPlugin();
+    if (!AdMob || !admobReady) return;
+    try {
+        await AdMob.showBanner({
+            adId: AD_UNIT_BANNER,
+            adSize: 'BANNER',
+            position: 'BOTTOM_CENTER',
+            margin: 0,
+            isTesting: AD_TESTING_MODE
+        });
+    } catch (e) {
+        console.warn('showBanner failed', e);
+    }
+}
+
+async function hideBannerAd() {
+    const AdMob = getAdMobPlugin();
+    if (!AdMob || !admobReady) return;
+    try {
+        await AdMob.hideBanner();
+    } catch (e) {
+        // 未顯示過banner都可能會報錯，唔理佢
+    }
+}
+
+async function prepareInterstitial() {
+    const AdMob = getAdMobPlugin();
+    if (!AdMob || !admobReady) return;
+    try {
+        await AdMob.prepareInterstitial({
+            adId: AD_UNIT_INTERSTITIAL,
+            isTesting: AD_TESTING_MODE
+        });
+        interstitialLoaded = true;
+    } catch (e) {
+        console.warn('prepareInterstitial failed', e);
+        interstitialLoaded = false;
+    }
+}
+
+async function showInterstitialAd() {
+    const AdMob = getAdMobPlugin();
+    if (!AdMob || !admobReady || !interstitialLoaded) return;
+    try {
+        await AdMob.showInterstitial();
+    } catch (e) {
+        console.warn('showInterstitial failed', e);
+    } finally {
+        // 用完即刻準備下一個，等下次測驗完成都有得用
+        interstitialLoaded = false;
+        prepareInterstitial();
+    }
+}
 
 function loadDialogueVoices() {
     let voices = window.speechSynthesis.getVoices() || [];
@@ -2281,6 +2375,9 @@ function showQuizResult() {
         fullScoreBlock.style.display = 'none';
         resultEmoji.innerText = score >= 4 ? '🎉' : '💪';
     }
+
+    // 完成測驗後顯示一次插頁廣告 (若準備好嘅話)
+    showInterstitialAd();
 }
 
 document.getElementById('quiz-retry-btn').addEventListener('click', () => {
@@ -2557,6 +2654,9 @@ function showMixedQuizResult() {
         fullScoreBlock.style.display = 'none';
         resultEmoji.innerText = score >= 5 ? '🎉' : '💪';
     }
+
+    // 完成混合測驗後顯示一次插頁廣告 (若準備好嘅話)
+    showInterstitialAd();
 }
 
 document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => {
