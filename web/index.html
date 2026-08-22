@@ -965,7 +965,7 @@ let vocab = [
   // Fruits
   { topic: "Fruits", emoji: "🍎", chineseName: "蘋果", englishName: "Apple" },
   { topic: "Fruits", emoji: "🍌", chineseName: "香蕉", englishName: "Banana" },
-  { topic: "Fruits", emoji: "🍊", chineseName: "橙", englishName: "Orange" },
+  { topic: "Fruits", emoji: "🍊", chineseName: "橙", englishName: "Orange", chineseNameMandarin: "橙子" },
   { topic: "Fruits", emoji: "🍓", chineseName: "草莓", englishName: "Strawberry" },
   { topic: "Fruits", emoji: "🍇", chineseName: "葡萄", englishName: "Grape" },
   { topic: "Fruits", emoji: "🍉", chineseName: "西瓜", englishName: "Watermelon" },
@@ -974,7 +974,7 @@ let vocab = [
   { topic: "Fruits", emoji: "🍑", chineseName: "桃子", englishName: "Peach" },
   { topic: "Fruits", emoji: "🍒", chineseName: "櫻桃", englishName: "Cherry" },
   { topic: "Fruits", emoji: "🍐", chineseName: "梨子", englishName: "Pear" },
-  { topic: "Fruits", emoji: "🥝", chineseName: "奇異果", englishName: "Kiwi" },
+  { topic: "Fruits", emoji: "🥝", chineseName: "奇異果", englishName: "Kiwi", chineseNameMandarin: "獼猴桃" },
   { topic: "Fruits", emoji: "🍋", chineseName: "檸檬", englishName: "Lemon" },
   { topic: "Fruits", emoji: "🍈", chineseName: "蜜瓜", englishName: "Melon" },
   { topic: "Fruits", emoji: "🥥", chineseName: "椰子", englishName: "Coconut" },
@@ -989,14 +989,14 @@ let vocab = [
   { topic: "Animals", emoji: "🐯", chineseName: "老虎", englishName: "Tiger" },
   { topic: "Animals", emoji: "🐻", chineseName: "熊", englishName: "Bear" },
   { topic: "Animals", emoji: "🐼", chineseName: "大熊貓", englishName: "Panda" },
-  { topic: "Animals", emoji: "🐨", chineseName: "樹熊", englishName: "Koala" },
+  { topic: "Animals", emoji: "🐨", chineseName: "樹熊", englishName: "Koala", chineseNameMandarin: "考拉" },
   { topic: "Animals", emoji: "🐰", chineseName: "兔子", englishName: "Rabbit" },
   { topic: "Animals", emoji: "🐱", chineseName: "貓咪", englishName: "Cat" },
   { topic: "Animals", emoji: "🐶", chineseName: "狗狗", englishName: "Dog" },
   { topic: "Animals", emoji: "🦊", chineseName: "狐狸", englishName: "Fox" },
   { topic: "Animals", emoji: "🐵", chineseName: "猴子", englishName: "Monkey" },
   { topic: "Animals", emoji: "🐷", chineseName: "豬", englishName: "Pig" },
-  { topic: "Animals", emoji: "🐮", chineseName: "乳牛", englishName: "Cow" },
+  { topic: "Animals", emoji: "🐮", chineseName: "乳牛", englishName: "Cow", chineseNameMandarin: "奶牛" },
   { topic: "Animals", emoji: "🐑", chineseName: "綿羊", englishName: "Sheep" },
   { topic: "Animals", emoji: "🐴", chineseName: "馬", englishName: "Horse" },
   { topic: "Animals", emoji: "🐘", chineseName: "大象", englishName: "Elephant" },
@@ -1007,15 +1007,15 @@ let vocab = [
   { topic: "Animals", emoji: "🦉", chineseName: "貓頭鷹", englishName: "Owl" },
 
   // Transports
-  { topic: "Transports", emoji: "🚗", chineseName: "私家車", englishName: "Car" },
-  { topic: "Transports", emoji: "🚌", chineseName: "巴士", englishName: "Bus" },
-  { topic: "Transports", emoji: "🚕", chineseName: "的士", englishName: "Taxi" },
+  { topic: "Transports", emoji: "🚗", chineseName: "私家車", englishName: "Car", chineseNameMandarin: "轎車" },
+  { topic: "Transports", emoji: "🚌", chineseName: "巴士", englishName: "Bus", chineseNameMandarin: "公交車" },
+  { topic: "Transports", emoji: "🚕", chineseName: "的士", englishName: "Taxi", chineseNameMandarin: "出租車" },
   { topic: "Transports", emoji: "🚑", chineseName: "救護車", englishName: "Ambulance" },
   { topic: "Transports", emoji: "🚒", chineseName: "消防車", englishName: "Fire truck" },
   { topic: "Transports", emoji: "🚓", chineseName: "警車", englishName: "Police car" },
   { topic: "Transports", emoji: "🚚", chineseName: "貨車", englishName: "Truck" },
-  { topic: "Transports", emoji: "🚲", chineseName: "單車", englishName: "Bicycle" },
-  { topic: "Transports", emoji: "🛵", chineseName: "電單車", englishName: "Scooter" },
+  { topic: "Transports", emoji: "🚲", chineseName: "單車", englishName: "Bicycle", chineseNameMandarin: "自行車" },
+  { topic: "Transports", emoji: "🛵", chineseName: "電單車", englishName: "Scooter", chineseNameMandarin: "摩托車" },
   { topic: "Transports", emoji: "🚂", chineseName: "火車", englishName: "Train" },
   { topic: "Transports", emoji: "🚇", chineseName: "地鐵", englishName: "Subway" },
   { topic: "Transports", emoji: "✈️", chineseName: "飛機", englishName: "Airplane" },
@@ -1053,21 +1053,21 @@ let vocab = [
   // Vegetables
   { topic: "Vegetables", emoji: "🥦", chineseName: "西蘭花", englishName: "Broccoli" },
   { topic: "Vegetables", emoji: "🥕", chineseName: "胡蘿蔔", englishName: "Carrot" },
-  { topic: "Vegetables", emoji: "🌽", chineseName: "玉米", englishName: "Corn" },
-  { topic: "Vegetables", emoji: "🥔", chineseName: "馬鈴薯", englishName: "Potato" },
+  { topic: "Vegetables", emoji: "🌽", chineseName: "粟米", englishName: "Corn", chineseNameMandarin: "玉米" },
+  { topic: "Vegetables", emoji: "🥔", chineseName: "薯仔", englishName: "Potato", chineseNameMandarin: "土豆" },
   { topic: "Vegetables", emoji: "🧅", chineseName: "洋蔥", englishName: "Onion" },
   { topic: "Vegetables", emoji: "🧄", chineseName: "大蒜", englishName: "Garlic" },
   { topic: "Vegetables", emoji: "🥬", chineseName: "生菜", englishName: "Lettuce" },
-  { topic: "Vegetables", emoji: "🥒", chineseName: "青瓜", englishName: "Cucumber" },
+  { topic: "Vegetables", emoji: "🥒", chineseName: "青瓜", englishName: "Cucumber", chineseNameMandarin: "黃瓜" },
   { topic: "Vegetables", emoji: "🍆", chineseName: "茄子", englishName: "Eggplant" },
   { topic: "Vegetables", emoji: "🌶️", chineseName: "辣椒", englishName: "Chili" },
   { topic: "Vegetables", emoji: "🍄", chineseName: "蘑菇", englishName: "Mushroom" },
   { topic: "Vegetables", emoji: "🎃", chineseName: "南瓜", englishName: "Pumpkin" },
-  { topic: "Vegetables", emoji: "🍠", chineseName: "番薯", englishName: "Sweet potato" },
+  { topic: "Vegetables", emoji: "🍠", chineseName: "番薯", englishName: "Sweet potato", chineseNameMandarin: "紅薯" },
   { topic: "Vegetables", emoji: "🌱", chineseName: "豆芽", englishName: "Bean sprout" },
-  { topic: "Vegetables", emoji: "🥗", chineseName: "沙律", englishName: "Salad" },
-  { topic: "Vegetables", emoji: "🫑", chineseName: "燈籠椒", englishName: "Bell pepper" },
-  { topic: "Vegetables", emoji: "🫛", chineseName: "碗豆", englishName: "Pea" },
+  { topic: "Vegetables", emoji: "🥗", chineseName: "沙律", englishName: "Salad", chineseNameMandarin: "沙拉" },
+  { topic: "Vegetables", emoji: "🫑", chineseName: "燈籠椒", englishName: "Bell pepper", chineseNameMandarin: "彩椒" },
+  { topic: "Vegetables", emoji: "🫛", chineseName: "豌豆", englishName: "Pea" },
   { topic: "Vegetables", emoji: "🥬", chineseName: "菠菜", englishName: "Spinach" },
   { topic: "Vegetables", emoji: "🥣", chineseName: "蔬菜湯", englishName: "Soup" },
   { topic: "Vegetables", emoji: "🌿", chineseName: "香草", englishName: "Herb" },
@@ -1669,15 +1669,16 @@ function speakText(text, langCode, callback, voiceOptions) {
 }
 
 // 核心功能：連讀四合一（播完一個等 1 秒播下一個）
-function speakAllSequence(engText, chiText) {
+function speakAllSequence(engText, chiText, mandarinText) {
     stopSpeaking(); // 先清空目前的語音
+    let mandarinChiText = mandarinText || chiText;
 
     // 第一步：讀英文
     speakText(engText, 'en-US', () => {
         // 英文讀完後，等待 1000 毫秒 (1秒)
         setTimeout(() => {
-            // 第二步：讀普通話
-            speakChinese(chiText, 'zh-CN', () => {
+            // 第二步：讀普通話 (用普通話用字，例如「玉米」而唔係廣東話「粟米」)
+            speakChinese(mandarinChiText, 'zh-CN', () => {
                 // 普通話讀完後，再等待 1000 毫秒 (1秒)
                 setTimeout(() => {
                     // 第三步：讀粵語
@@ -1697,7 +1698,10 @@ function displayVocabItems(topic) {
     if (item.topic === topic) {
       let vocabItem = document.createElement('div');
       vocabItem.classList.add('vocab-item');
-      vocabItem.innerHTML = `<span style="font-size:36px;">${item.emoji}</span><p style="font-size:18px;"><b>${item.englishName}</b></p><p style="color:#555;">${item.chineseName}</p>`;
+      let chineseDisplay = item.chineseNameMandarin
+          ? `<p style="color:#555;">🇭🇰 ${item.chineseName}　🇨🇳 ${item.chineseNameMandarin}</p>`
+          : `<p style="color:#555;">${item.chineseName}</p>`;
+      vocabItem.innerHTML = `<span style="font-size:36px;">${item.emoji}</span><p style="font-size:18px;"><b>${item.englishName}</b></p>${chineseDisplay}`;
 
       // 按鈕容器
       let btnGroup = document.createElement('div');
@@ -1707,7 +1711,7 @@ function displayVocabItems(topic) {
       let btnAll = document.createElement('button');
       btnAll.classList.add('vocab-speak-btn', 'btn-all');
       btnAll.innerHTML = '🎵 廣播：三語連讀';
-      btnAll.addEventListener('click', () => speakAllSequence(item.englishName, item.chineseName));
+      btnAll.addEventListener('click', () => speakAllSequence(item.englishName, item.chineseName, item.chineseNameMandarin));
 
       // 2. 🇺🇸 英語按鈕
       let btnEn = document.createElement('button');
@@ -1719,12 +1723,14 @@ function displayVocabItems(topic) {
       });
 
       // 3. 🇨🇳 普通話按鈕 (Mandarin，明確揀普通話聲線)
+      // 部分生字喺廣東話同普通話用字唔同 (例如「粟米」vs「玉米」)，
+      // 有 chineseNameMandarin 就讀嗰個，冇就照用 chineseName
       let btnPnh = document.createElement('button');
       btnPnh.classList.add('vocab-speak-btn', 'btn-pnh');
       btnPnh.innerHTML = '🇨🇳 讀普通話';
       btnPnh.addEventListener('click', () => {
           stopSpeaking();
-          speakChinese(item.chineseName, 'zh-CN');
+          speakChinese(item.chineseNameMandarin || item.chineseName, 'zh-CN');
       });
 
       // 4. 🇭🇰 粵語按鈕
