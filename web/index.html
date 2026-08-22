@@ -966,14 +966,14 @@ let vocab = [
   { topic: "Fruits", emoji: "🍎", chineseName: "蘋果", englishName: "Apple" },
   { topic: "Fruits", emoji: "🍌", chineseName: "香蕉", englishName: "Banana" },
   { topic: "Fruits", emoji: "🍊", chineseName: "橙", englishName: "Orange", chineseNameMandarin: "橙子" },
-  { topic: "Fruits", emoji: "🍓", chineseName: "草莓", englishName: "Strawberry" },
-  { topic: "Fruits", emoji: "🍇", chineseName: "葡萄", englishName: "Grape" },
+  { topic: "Fruits", emoji: "🍓", chineseName: "士多啤梨", englishName: "Strawberry", chineseNameMandarin: "草莓" },
+  { topic: "Fruits", emoji: "🍇", chineseName: "提子", englishName: "Grape", chineseNameMandarin: "葡萄" },
   { topic: "Fruits", emoji: "🍉", chineseName: "西瓜", englishName: "Watermelon" },
   { topic: "Fruits", emoji: "🍍", chineseName: "菠蘿", englishName: "Pineapple" },
   { topic: "Fruits", emoji: "🥭", chineseName: "芒果", englishName: "Mango" },
-  { topic: "Fruits", emoji: "🍑", chineseName: "桃子", englishName: "Peach" },
+  { topic: "Fruits", emoji: "🍑", chineseName: "桃", englishName: "Peach", chineseNameMandarin: "桃子" },
   { topic: "Fruits", emoji: "🍒", chineseName: "櫻桃", englishName: "Cherry" },
-  { topic: "Fruits", emoji: "🍐", chineseName: "梨子", englishName: "Pear" },
+  { topic: "Fruits", emoji: "🍐", chineseName: "梨", englishName: "Pear", chineseNameMandarin: "梨子" },
   { topic: "Fruits", emoji: "🥝", chineseName: "奇異果", englishName: "Kiwi", chineseNameMandarin: "獼猴桃" },
   { topic: "Fruits", emoji: "🍋", chineseName: "檸檬", englishName: "Lemon" },
   { topic: "Fruits", emoji: "🍈", chineseName: "蜜瓜", englishName: "Melon" },
@@ -1546,8 +1546,9 @@ function getSpeakerVoiceOptions(speakerName) {
         else if (typeof capMaleVoiceIndex === 'number') opts.capVoiceIndex = capMaleVoiceIndex;
         return opts;
     }
-    // Alice 及其他角色：正常女聲，音調略高扮 5 歲女孩
-    let opts = { pitch: 1.15, rate: 1.03 };
+    // Alice 及其他角色：正常女聲，唔加誇張音調 (之前 1.15 音調喺手機原生引擎
+    // 讀出嚟有啲唔自然，而家改返接近正常音調)
+    let opts = { pitch: 1.0, rate: 1.0 };
     if (preferredFemaleVoice) opts.voice = preferredFemaleVoice;
     if (typeof capFemaleVoiceIndex === 'number') opts.capVoiceIndex = capFemaleVoiceIndex;
     return opts;
@@ -2234,6 +2235,12 @@ function handleQuizAnswer(optionText, btnEl) {
                 b.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
             }
         });
+
+        // 答錯都讀出正確答案 (英文生字)，等小朋友即刻學到啱嘅讀音
+        stopSpeaking();
+        setTimeout(() => {
+            speakText(q.correct, 'en-US');
+        }, 300);
     }
 
     // 作答後鎖定所有選項 (單次作答)
@@ -2494,6 +2501,14 @@ function handleMixedQuizAnswer(optionItem, btnEl) {
                 b.querySelector('.quiz-mark').innerHTML = '<span class="tick-anim">✅</span>';
             }
         });
+
+        // 閱讀模式：答錯都讀出正確嘅廣東話答案，等小朋友即刻學到啱嘅讀音
+        if (mixedQuizSession.type === 'reading') {
+            stopSpeaking();
+            setTimeout(() => {
+                speakChinese(q.target.chineseName, 'zh-HK');
+            }, 300);
+        }
     }
 
     // 作答後鎖定所有選項 (單次作答)
