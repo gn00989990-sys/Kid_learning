@@ -59,9 +59,11 @@ workflows:
           cd "$IOS_PROJECT_DIR"
           echo "Setting marketing version (CFBundleShortVersionString) to $APP_MARKETING_VERSION"
           agvtool new-marketing-version "$APP_MARKETING_VERSION"
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID")
-          NEW_BUILD_NUMBER=$(($LATEST_BUILD_NUMBER + 1))
-          echo "Latest TestFlight build number: $LATEST_BUILD_NUMBER -> setting new build number: $NEW_BUILD_NUMBER"
+          # 用時間戳做 build number，唔靠查詢 Apple API (TestFlight 啱啱上傳
+          # 嘅 build 有時要幾分鐘先處理完，馬上查會攞唔到最新資料，
+          # 導致計出重複嘅 build number)。時間戳保證每次都遞增、唔會撞。
+          NEW_BUILD_NUMBER=$(date +%s)
+          echo "Setting build number to $NEW_BUILD_NUMBER"
           agvtool new-version -all $NEW_BUILD_NUMBER
 
       - name: Build ipa for distribution
