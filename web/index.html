@@ -54,7 +54,7 @@
             padding: 60px 20px 40px 20px;
         }
 
-        .home-button, .topic-button, .dialogue-button, .audio-control-btn {
+        .home-button, .topic-button, .ph-stage-btn, .dialogue-button, .audio-control-btn {
             padding: 20px 40px;
             font-size: 24px;
             border: none;
@@ -706,7 +706,7 @@
                 padding: 0 10px;
             }
 
-            .home-button, .topic-button, .dialogue-button {
+            .home-button, .topic-button, .ph-stage-btn, .dialogue-button {
                 padding: 14px 20px;
                 font-size: 17px;
                 width: 100%;
@@ -788,7 +788,45 @@
             .quiz-mode-card { width: 130px; }
             h1 { font-size: 19px; }
         }
-    </style>
+            .ph-home-pill { display:block; width:min(240px,80vw); box-sizing:border-box; padding:16px 10px; font-size:24px; font-weight:700; color:#fff; border-radius:20px; background:linear-gradient(135deg,#7e57c2,#5e35b1); box-shadow:0 4px 10px rgba(0,0,0,.15); margin-top:10px; }
+        .ph-tabs button { font-size:18px; padding:10px 22px; margin:4px; border:none; border-radius:30px; background:#ddd; cursor:pointer; }
+        .ph-tabs button.on { background:#7e57c2; color:#fff; }
+        .ph-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; width:min(480px,92vw); margin:14px 0; }
+        .ph-card { font-size:34px; font-weight:700; padding:22px 6px; border:none; border-radius:16px; background:#fff8e1; color:#333; box-shadow:0 3px 8px rgba(0,0,0,.15); cursor:pointer; }
+        .ph-card:active { transform:scale(.96); background:#ffe082; }
+        #ph-spell { text-align:center; width:min(480px,92vw); }
+        #ph-progress { font-size:16px; color:#666; margin:8px 0; }
+        .ph-listen, .ph-peek { font-size:18px; padding:10px 22px; border:none; border-radius:30px; background:#42a5f5; color:#fff; cursor:pointer; margin:6px; }
+        .ph-peek { background:#9e9e9e; font-size:15px; }
+        #ph-slots { display:flex; justify-content:center; gap:8px; margin:14px 0 6px; }
+        .ph-slot { width:46px; height:58px; line-height:58px; font-size:36px; font-weight:700; border-bottom:4px solid #7e57c2; }
+        #ph-hint { min-height:34px; font-size:26px; font-weight:700; color:#e65100; }
+        #ph-tiles { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:10px 0; }
+        .ph-tile { width:58px; height:58px; font-size:34px; font-weight:700; border:none; border-radius:14px; background:#ffd54f; box-shadow:0 3px 6px rgba(0,0,0,.2); cursor:pointer; }
+        .ph-tile:disabled { opacity:.25; }
+        .ph-tile.bad { animation:homeButtonShake .25s 2; background:#ef9a9a; }
+        #ph-cards { flex-direction:column; align-items:center; width:min(480px,92vw); }
+        #ph-count { font-size:18px; color:#555; margin:10px 0 6px; font-weight:700; }
+        #ph-bigcard { width:min(400px,88vw); height:min(46vh,340px); display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff; border-radius:28px; box-shadow:0 8px 20px rgba(0,0,0,.2); border:6px solid #7e57c2; cursor:pointer; user-select:none; -webkit-user-select:none; }
+        #ph-bigcard.flip { animation:phFlip .25s ease-out; }
+        @keyframes phFlip { from { opacity:0; transform:translateX(24px) scale(.96); } to { opacity:1; transform:none; } }
+        #ph-word { font-size:min(26vw,120px); font-weight:800; color:#333; letter-spacing:2px; line-height:1.1; }
+        #ph-bigcard small { font-size:15px; color:#999; margin-top:14px; }
+        .ph-nav { display:flex; gap:18px; margin:20px 0; }
+        .ph-nav button { width:76px; height:64px; font-size:28px; border:none; border-radius:32px; background:#7e57c2; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,.2); cursor:pointer; }
+        .ph-nav button:nth-child(2) { background:#42a5f5; }
+        .ph-nav button:active { transform:scale(.94); }
+        #ph-list { position:fixed; inset:0; z-index:50; background:rgba(255,255,255,.98); flex-direction:column; padding:max(16px, env(safe-area-inset-top)) 14px 16px; box-sizing:border-box; }
+        #ph-list-head { display:flex; justify-content:space-between; align-items:center; font-size:20px; font-weight:700; margin-bottom:10px; }
+        #ph-list-head button { font-size:20px; border:none; background:#eee; border-radius:50%; width:42px; height:42px; }
+        #ph-list-grid { flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:10px; align-content:start; padding:4px; }
+        .ph-chip { font-size:22px; font-weight:700; padding:14px 4px; border:none; border-radius:14px; background:#fff8e1; box-shadow:0 2px 5px rgba(0,0,0,.18); }
+        .ph-chip.on { background:#7e57c2; color:#fff; }
+        #ph-list-go { margin-top:10px; font-size:20px; font-weight:700; padding:14px; border:none; border-radius:30px; background:#43a047; color:#fff; }
+        .ph-nav2 { display:flex; justify-content:center; gap:16px; margin:14px 0; }
+        .ph-nav2 button { min-width:130px; height:56px; font-size:22px; font-weight:700; border:none; border-radius:28px; background:#7e57c2; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,.2); }
+        .ph-nav2 button:active { transform:scale(.95); }
+</style>
 </head>
 <body>
     <div class="background"></div>
@@ -804,6 +842,9 @@
         </button>
         <button class="home-button" id="mix-quiz-btn">
             <img src="BG/quiz_time_button.PNG" alt="小測驗">
+        </button>
+        <button class="home-button" id="phonics-btn" onclick="showPage('phonics-stage-page')">
+            <img src="BG/phonics.png" alt="Phonics" onerror="this.outerHTML='<span class=ph-home-pill>🔤 Phonics 字卡</span>'">
         </button>
     </div>
 
@@ -827,6 +868,78 @@
         <button class="return-btn" onclick="showPage('vocab-topics-page')">返回主題選單</button>
         <button class="quiz-launch-btn" id="start-quiz-btn">📝 開始小測驗</button>
         <div id="vocab-items" class="vocab-grid"></div>
+    </div>
+
+    <!-- Phonics stage select -->
+    <div id="phonics-stage-page" class="page" style="display: none;">
+        <h1>🔤 Phonics 字卡</h1>
+        <button class="return-btn" onclick="showPage('home-page')">返回主頁</button>
+        <div id="phonics-stage-buttons">
+            <button class="ph-stage-btn" onclick="openPhonics(1)">Stage 1</button>
+            <button class="ph-stage-btn" onclick="openPhonics(2)">Stage 2</button>
+            <button class="ph-stage-btn" onclick="openPhonics(3)">Stage 3</button>
+            <button class="ph-stage-btn" onclick="openPhonics(4)">Stage 4</button>
+            <button class="ph-stage-btn" onclick="openPhonics(0)">🌟 全部 1-4</button>
+        </div>
+    </div>
+
+    <!-- Phonics cards + spelling -->
+    <div id="phonics-page" class="page" style="display: none;">
+        <h1 id="phonics-title"></h1>
+        <button class="return-btn" onclick="showPage('phonics-stage-page')">返回階段選單</button>
+        <div class="ph-tabs">
+            <button id="ph-tab-cards" onclick="setPhTab('cards')">📖 字卡</button>
+            <button id="ph-tab-spell" onclick="setPhTab('spell')">✏️ 拼寫</button>
+            <button onclick="openPhList()">📋 字表</button>
+        </div>
+        <div id="ph-list" style="display:none;">
+            <div id="ph-list-head"><span id="ph-list-title"></span><button onclick="closePhList()">✖</button></div>
+            <div id="ph-list-grid"></div>
+            <button id="ph-list-go" onclick="goPhList()"></button>
+        </div>
+        <div id="ph-cards" style="display:none;">
+            <div id="ph-count"></div>
+            <div id="ph-bigcard" onclick="speakPh(phWords[phCard])">
+                <span id="ph-word"></span>
+            </div>
+            <div class="ph-nav">
+                <button onclick="phStep(-1)">◀</button>
+                <button onclick="speakPh(phWords[phCard])">🔊</button>
+                <button onclick="phStep(1)">▶</button>
+            </div>
+        </div>
+        <div id="ph-spell" style="display:none;">
+          <div class="ph-tabs" id="ph-levels">
+            <button onclick="setPhLevel(0)">😊 Easy</button>
+            <button onclick="setPhLevel(1)">🙂 Medium</button>
+            <button onclick="setPhLevel(2)">😎 Hard</button>
+          </div>
+          <div id="ph-play">
+            <div id="ph-progress"></div>
+            <button class="ph-listen" onclick="speakPh(phOrder[phIdx])">🔊 再聽一次</button>
+            <div id="ph-slots"></div>
+            <div id="ph-hint"></div>
+            <div id="ph-tiles"></div>
+            <button class="ph-peek" onclick="peekPh()">👀 睇答案</button>
+            <div class="ph-nav2">
+                <button onclick="phSpellStep(-1)">◀ Back</button>
+                <button onclick="phSpellStep(1)">Next ▶</button>
+            </div>
+          </div>
+          <div id="ph-result" class="quiz-card" style="display:none; text-align:center;">
+            <div class="quiz-result-emoji" id="ph-result-emoji">🎉</div>
+            <div class="quiz-result-title">恭喜完成！</div>
+            <div class="quiz-result-score" id="ph-result-score"></div>
+            <div id="ph-full-sticker" style="display:none;">
+                <div class="quiz-sticker">🌟🏆🌟</div>
+                <div style="font-size:18px; color:#e67e22; font-weight:700;">滿分！你是拼寫小天才！</div>
+            </div>
+            <div class="quiz-result-btns">
+                <button class="quiz-result-btn" onclick="retryPh()">🔁 再玩一次</button>
+                <button class="quiz-result-btn secondary" onclick="setPhTab('cards')">📖 返回字卡</button>
+            </div>
+          </div>
+        </div>
     </div>
 
     <!-- 4. Dialogue Practice Page (topic list) -->
@@ -1276,6 +1389,9 @@ function showPage(pageId) {
     document.getElementById('quiz-page').style.display = 'none';
     document.getElementById('quiz-mode-page').style.display = 'none';
     document.getElementById('mixed-quiz-page').style.display = 'none';
+    document.getElementById('phonics-stage-page').style.display = 'none';
+    document.getElementById('phonics-page').style.display = 'none';
+    clearTimeout(phTimer);
 
     document.getElementById(pageId).style.display = 'flex';
 
@@ -1455,6 +1571,151 @@ async function loadCapacitorVoices() {
 }
 loadCapacitorVoices();
 
+// ===== Phonics (Letterland-style Stage 1-4 word cards + spelling) =====
+// 字表可以自己改：每個 stage 入面嘅 words 照加照減就得
+const PHONICS = {
+    1: { name: 'Stage 1', words: ['cat','bat','hat','mat','sat','rat','map','cap','tap','nap','bag','tag','van','fan','can','pan','dad','bed','red','pen','hen','ten','leg','net','wet','pet','jet','pin','sit','big','dig','pig','lip','zip','hit','kid','six','dog','pot','hop','top','box','fox','log','mop','hot','sun','bus','cup','mug','bug','run','nut','hug','jug'] },
+    2: { name: 'Stage 2', words: ['ship','shop','shed','fish','dish','wish','chip','chop','chin','chat','much','rich','thin','this','that','then','with','bath','duck','back','sock','neck','pick','kick','ring','king','song','long','sing','bell','doll','hill','fill','toss','kiss','miss','off','puff','buzz'] },
+    3: { name: 'Stage 3', words: ['flag','frog','clap','club','crab','drum','drip','grab','grin','plan','plug','skip','slip','step','stop','snap','swim','trip','twin','spot','hand','sand','tent','nest','milk','jump','lamp','desk','lift','gift','pond','bank','pink'] },
+    4: { name: 'Stage 4', words: ['cake','name','game','make','lake','bike','like','kite','five','nine','home','bone','nose','rope','cube','tube','rain','train','tail','mail','tree','feet','bee','green','sleep','boat','coat','road','soap','moon','food','zoo','spoon','play','day','say','way','light','night','high'] }
+};
+var phTimer;
+let phCard = 0, phWords = [], phOrder = [], phIdx = 0, phPos = 0, phStage = 0;
+
+function phShuffle(a) { for (let i = a.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+// Phonics 用英式發音 (en-GB)，例如 bath 會讀 /bɑːθ/
+function speakPh(w) { if (w) speakText(w, 'en-GB', null, { rate: 0.8 }); }
+
+function showPhCard(auto) {
+    let w = phWords[phCard], card = document.getElementById('ph-bigcard');
+    document.getElementById('ph-word').innerText = w;
+    document.getElementById('ph-count').innerText = `${phCard + 1} / ${phWords.length}`;
+    card.classList.remove('flip'); void card.offsetWidth; card.classList.add('flip');
+    if (auto) speakPh(w);
+}
+function phStep(d) { phCard = (phCard + d + phWords.length) % phWords.length; showPhCard(true); }
+(function () { // 左右掃動換字卡
+    let x0 = null, c = document.getElementById('ph-bigcard');
+    c.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+    c.addEventListener('touchend', e => {
+        if (x0 === null) return;
+        let dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) > 50) phStep(dx < 0 ? 1 : -1);
+    });
+})();
+
+// 難度：Easy 只有答案嘅字母；Medium 多 3 個；Hard 多 6 個干擾字母
+const PH_EXTRA = [0, 3, 6];
+let phLevel = 0;
+try { phLevel = Math.min(2, Math.max(0, +localStorage.getItem('phLevel') || 0)); } catch (e) {}
+function phExtra(w) {
+    let pool = 'abcdefghijklmnopqrstuvwxyz'.split('').filter(c => !w.includes(c));
+    return phShuffle(pool).slice(0, PH_EXTRA[phLevel]);
+}
+function updatePhLevelUI() {
+    [...document.getElementById('ph-levels').children].forEach((b, i) => b.className = i === phLevel ? 'on' : '');
+}
+function setPhLevel(l) {
+    phLevel = l; updatePhLevelUI();
+    try { localStorage.setItem('phLevel', l); } catch (e) {}
+    if (phIdx < phOrder.length) { clearTimeout(phTimer); nextSpell(); }
+}
+let phSel = [], phListSpell = false, phSolved = new Set();
+function retryPh() { phSolved.clear(); phOrder = phShuffle(phOrder.slice()); phIdx = 0; nextSpell(); }
+function openPhList() {
+    phListSpell = document.getElementById('ph-spell').style.display === 'block';
+    phSel = [];
+    document.getElementById('ph-list-title').innerText = phListSpell ? '揀要拼寫嘅字（可以揀多個）' : '揀一個字睇字卡';
+    document.getElementById('ph-list-grid').innerHTML = phWords.map((w, i) =>
+        `<button class="ph-chip${!phListSpell && i === phCard ? ' on' : ''}" onclick="pickPh(${i}, this)">${w}</button>`).join('');
+    let go = document.getElementById('ph-list-go');
+    go.style.display = phListSpell ? 'block' : 'none';
+    go.innerText = '🎲 隨機拼寫 10 個字';
+    document.getElementById('ph-list').style.display = 'flex';
+}
+function closePhList() { document.getElementById('ph-list').style.display = 'none'; }
+function pickPh(i, el) {
+    if (!phListSpell) { phCard = i; showPhCard(true); closePhList(); return; }
+    let k = phSel.indexOf(i);
+    if (k >= 0) phSel.splice(k, 1); else phSel.push(i);
+    el.classList.toggle('on');
+    document.getElementById('ph-list-go').innerText = phSel.length ? `✏️ 開始拼寫 (${phSel.length} 個字)` : '🎲 隨機拼寫 10 個字';
+}
+function goPhList() {
+    closePhList();
+    if (phSel.length) { clearTimeout(phTimer); phOrder = phShuffle(phSel.map(i => phWords[i])); phSolved.clear(); phIdx = 0; nextSpell(); }
+    else setPhTab('spell');
+}
+
+function openPhonics(stage) {
+    closePhList();
+    phStage = stage;
+    phWords = stage ? PHONICS[stage].words.slice() : [].concat(...Object.values(PHONICS).map(x => x.words));
+    document.getElementById('phonics-title').innerText = stage ? PHONICS[stage].name : 'Stage 1-4 全部';
+    phCard = 0; showPhCard(false);
+    showPage('phonics-page');
+    setPhTab('cards');
+}
+
+function setPhTab(t) {
+    clearTimeout(phTimer); stopSpeaking();
+    document.getElementById('ph-cards').style.display = t === 'cards' ? 'flex' : 'none';
+    document.getElementById('ph-spell').style.display = t === 'spell' ? 'block' : 'none';
+    document.getElementById('ph-tab-cards').className = t === 'cards' ? 'on' : '';
+    document.getElementById('ph-tab-spell').className = t === 'spell' ? 'on' : '';
+    if (t === 'spell') { updatePhLevelUI(); phOrder = phShuffle(phWords.slice()).slice(0, 10); phSolved.clear(); phIdx = 0; nextSpell(); }  // 每輪隨機 10 個字
+}
+
+function nextSpell() {
+    let box = document.getElementById('ph-spell');
+    if (phIdx >= phOrder.length) {
+        let total = phOrder.length, score = phOrder.filter(x => phSolved.has(x)).length;
+        document.getElementById('ph-play').style.display = 'none';
+        document.getElementById('ph-result').style.display = 'flex';
+        document.getElementById('ph-result-score').innerText = `你拼啱咗 ${score}/${total} 個字`;
+        let full = total > 0 && score === total;
+        document.getElementById('ph-full-sticker').style.display = full ? 'block' : 'none';
+        document.getElementById('ph-result-emoji').innerText = full ? '🏆' : (score >= total * 0.67 ? '🎉' : '💪');
+        if (full) playFanfareSound();
+        return;
+    }
+    document.getElementById('ph-play').style.display = 'block';
+    document.getElementById('ph-result').style.display = 'none';
+    let w = phOrder[phIdx]; phPos = 0;
+    document.getElementById('ph-progress').innerText = `${phIdx + 1} / ${phOrder.length}`;
+    document.getElementById('ph-hint').innerText = '';
+    document.getElementById('ph-slots').innerHTML = w.split('').map(() => '<span class="ph-slot"></span>').join('');
+    document.getElementById('ph-tiles').innerHTML = phShuffle(w.split('').concat(phExtra(w))).map(c => `<button class="ph-tile" onclick="tapTile(this,'${c}')">${c}</button>`).join('');
+    phTimer = setTimeout(() => speakPh(w), 300);
+}
+
+function tapTile(btn, c) {
+    let w = phOrder[phIdx];
+    if (c !== w[phPos]) { btn.classList.add('bad'); setTimeout(() => btn.classList.remove('bad'), 550); return; }
+    document.getElementById('ph-slots').children[phPos].innerText = c;
+    btn.disabled = true; phPos++;
+    if (phPos === w.length) {
+        phSolved.add(w);
+        document.getElementById('ph-hint').innerText = '✅ ' + w;
+        speakPh(w);
+        phTimer = setTimeout(() => { phIdx++; nextSpell(); }, 1600);
+    }
+}
+
+function phSpellStep(d) {
+    clearTimeout(phTimer); stopSpeaking();
+    let n = Math.max(0, Math.min(phOrder.length, phIdx + d));
+    if (n === phIdx) return;
+    phIdx = n; nextSpell();
+}
+
+function peekPh() {
+    let h = document.getElementById('ph-hint');
+    if (phIdx >= phOrder.length) return;
+    h.innerText = phOrder[phIdx];
+    phTimer = setTimeout(() => { if (phPos < phOrder[phIdx].length) h.innerText = ''; }, 2000);
+}
+
 // ===== AdMob (banner + interstitial) =====
 // 廣告單元 ID 對應 AdMob 入面已經同呢個 App Store listing 連接好嘅 App 記錄
 const AD_UNIT_BANNER = 'ca-app-pub-2149260055615094/6069577684';
@@ -1462,7 +1723,7 @@ const AD_UNIT_INTERSTITIAL = 'ca-app-pub-2149260055615094/8751581342';
 
 // 開發/測試階段設 true，用 Google 測試廣告，唔會撞政策問題；
 // 準備正式出街嗰陣記得改返 false
-const AD_TESTING_MODE = true;
+const AD_TESTING_MODE = false;
 
 let admobReady = false;
 let interstitialLoaded = false;
@@ -1476,10 +1737,11 @@ async function initAdMob() {
     if (!AdMob) return; // 瀏覽器入面冇呢個原生插件，正常，唔顯示廣告
     try {
         await AdMob.initialize({
-            initializeForTesting: AD_TESTING_MODE
+            initializeForTesting: AD_TESTING_MODE,
+            tagForChildDirectedTreatment: true,
+            maxAdContentRating: 'G'
         });
-        admobReady = true;
-        prepareInterstitial();
+        admobReady = true; // 測驗後唔再顯示插頁廣告，所以唔預載
     } catch (e) {
         console.warn('AdMob initialize failed', e);
     }
@@ -2376,8 +2638,6 @@ function showQuizResult() {
         resultEmoji.innerText = score >= 4 ? '🎉' : '💪';
     }
 
-    // 完成測驗後顯示一次插頁廣告 (若準備好嘅話)
-    showInterstitialAd();
 }
 
 document.getElementById('quiz-retry-btn').addEventListener('click', () => {
@@ -2655,8 +2915,6 @@ function showMixedQuizResult() {
         resultEmoji.innerText = score >= 5 ? '🎉' : '💪';
     }
 
-    // 完成混合測驗後顯示一次插頁廣告 (若準備好嘅話)
-    showInterstitialAd();
 }
 
 document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => {
