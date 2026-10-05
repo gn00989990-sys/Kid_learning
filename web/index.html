@@ -1741,7 +1741,8 @@ async function initAdMob() {
             tagForChildDirectedTreatment: true,
             maxAdContentRating: 'G'
         });
-        admobReady = true; // 測驗後唔再顯示插頁廣告，所以唔預載
+        admobReady = true;
+        prepareInterstitial();
     } catch (e) {
         console.warn('AdMob initialize failed', e);
     }
@@ -2638,6 +2639,8 @@ function showQuizResult() {
         resultEmoji.innerText = score >= 4 ? '🎉' : '💪';
     }
 
+    // 完成測驗後顯示一次插頁廣告 (若準備好嘅話)
+    showInterstitialAd();
 }
 
 document.getElementById('quiz-retry-btn').addEventListener('click', () => {
@@ -2915,6 +2918,8 @@ function showMixedQuizResult() {
         resultEmoji.innerText = score >= 5 ? '🎉' : '💪';
     }
 
+    // 完成混合測驗後顯示一次插頁廣告 (若準備好嘅話)
+    showInterstitialAd();
 }
 
 document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => {
