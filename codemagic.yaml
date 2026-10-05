@@ -17,7 +17,7 @@ workflows:
         APP_STORE_APPLE_ID: 6798940131   # Kid Learning numeric Apple ID (from App Store Connect URL)
         APP_MARKETING_VERSION: "1.1"     # <-- bump this every time you start a new App Store version (must match the version you create in App Store Connect, and must be higher than the last approved version)
       node: latest
-      xcode: latest
+      xcode: 26.4   # pinned: 26.6 upload tool failed with 'Cannot determine the Apple ID'; 26.4 uploaded OK
       cocoapods: default
     triggering:
       events:
