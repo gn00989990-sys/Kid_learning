@@ -1588,7 +1588,7 @@ const PHONICS = {
     3: { name: 'Stage 3', words: ['flag','frog','clap','club','crab','drum','drip','grab','grin','plan','plug','skip','slip','step','stop','snap','swim','trip','twin','spot','hand','sand','tent','nest','milk','jump','lamp','desk','lift','gift','pond','bank','pink'] },
     4: { name: 'Stage 4', words: ['cake','name','game','make','lake','bike','like','kite','five','nine','home','bone','nose','rope','cube','tube','rain','train','tail','mail','tree','feet','bee','green','sleep','boat','coat','road','soap','moon','food','zoo','spoon','play','day','say','way','light','night','high'] }
 };
-var phTimer;
+var phTimer, phAdShown = false;
 let phCard = 0, phWords = [], phOrder = [], phIdx = 0, phPos = 0, phStage = 0;
 
 function phShuffle(a) { for (let i = a.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -1654,7 +1654,7 @@ function setPhLevel(l) {
     if (phIdx < phOrder.length) { clearTimeout(phTimer); nextSpell(); }
 }
 let phSel = [], phListSpell = false, phSolved = new Set();
-function retryPh() { phSolved.clear(); phOrder = phShuffle(phOrder.slice()); phIdx = 0; nextSpell(); }
+function retryPh() { phSolved.clear(); phAdShown = false; phOrder = phShuffle(phOrder.slice()); phIdx = 0; nextSpell(); }
 function openPhList() {
     phListSpell = document.getElementById('ph-spell').style.display === 'block';
     phSel = [];
@@ -1676,7 +1676,7 @@ function pickPh(i, el) {
 }
 function goPhList() {
     closePhList();
-    if (phSel.length) { clearTimeout(phTimer); phOrder = phShuffle(phSel.map(i => phWords[i])); phSolved.clear(); phIdx = 0; nextSpell(); }
+    if (phSel.length) { clearTimeout(phTimer); phOrder = phShuffle(phSel.map(i => phWords[i])); phSolved.clear(); phAdShown = false; phIdx = 0; nextSpell(); }
     else setPhTab('spell');
 }
 
@@ -1696,7 +1696,7 @@ function setPhTab(t) {
     document.getElementById('ph-spell').style.display = t === 'spell' ? 'block' : 'none';
     document.getElementById('ph-tab-cards').className = t === 'cards' ? 'on' : '';
     document.getElementById('ph-tab-spell').className = t === 'spell' ? 'on' : '';
-    if (t === 'spell') { updatePhLevelUI(); phOrder = phShuffle(phWords.slice()).slice(0, 10); phSolved.clear(); phIdx = 0; nextSpell(); }  // 每輪隨機 10 個字
+    if (t === 'spell') { updatePhLevelUI(); phOrder = phShuffle(phWords.slice()).slice(0, 10); phSolved.clear(); phAdShown = false; phIdx = 0; nextSpell(); }  // 每輪隨機 10 個字
 }
 
 function nextSpell() {
@@ -1710,6 +1710,8 @@ function nextSpell() {
         document.getElementById('ph-full-sticker').style.display = full ? 'block' : 'none';
         document.getElementById('ph-result-emoji').innerText = full ? '🏆' : (score >= total * 0.67 ? '🎉' : '💪');
         if (full) playFanfareSound();
+        // 拼寫完成後顯示一次插頁廣告 (同一輪淨係出一次，Back/Next 返嚟唔會重複)
+        if (!phAdShown) { phAdShown = true; showInterstitialAd(); }
         return;
     }
     document.getElementById('ph-play').style.display = 'block';
