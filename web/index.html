@@ -843,8 +843,16 @@
         <button class="home-button" id="mix-quiz-btn">
             <img src="BG/quiz_time_button.PNG" alt="小測驗">
         </button>
+        <script>
+// iPhone 檔案名分大細寫：phonics.png / phonics.PNG 會逐個試，全部搵唔到先用文字掣
+function phImgNext(img) {
+    var l = (img.dataset.alt || '').split(',').filter(Boolean);
+    if (l.length) { img.dataset.alt = l.slice(1).join(','); img.src = l[0]; }
+    else { img.onerror = null; img.outerHTML = '<span class="ph-home-pill">🔤 Phonics 字卡</span>'; }
+}
+</script>
         <button class="home-button" id="phonics-btn" onclick="showPage('phonics-stage-page')">
-            <img src="BG/phonics.png" alt="Phonics" onerror="this.outerHTML='<span class=ph-home-pill>🔤 Phonics 字卡</span>'">
+            <img src="BG/phonics.PNG" alt="Phonics" data-alt="BG/phonics.png,BG/Phonics.PNG,BG/Phonics.png" onerror="phImgNext(this)">
         </button>
     </div>
 
