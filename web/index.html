@@ -892,6 +892,7 @@
             <button id="ph-tab-spell" onclick="setPhTab('spell')">✏️ 拼寫</button>
             <button onclick="openPhList()">📋 字表</button>
         </div>
+        <div id="ph-voice-info" style="font-size:12px; color:#999; margin:2px 0;"></div>
         <div id="ph-list" style="display:none;">
             <div id="ph-list-head"><span id="ph-list-title"></span><button onclick="closePhList()">✖</button></div>
             <div id="ph-list-grid"></div>
@@ -1584,7 +1585,31 @@ let phCard = 0, phWords = [], phOrder = [], phIdx = 0, phPos = 0, phStage = 0;
 
 function phShuffle(a) { for (let i = a.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 // Phonics 用英式發音 (en-GB)，例如 bath 會讀 /bɑːθ/
-function speakPh(w) { if (w) speakText(w, 'en-GB', null, { rate: 0.8 }); }
+// 明確揀返手機入面嘅英式 (en-GB) 語音，唔靠系統自動揀 (自動揀有時會變返美音)
+var phVoiceIdx = null, phVoiceName = '';
+async function pickBritishVoice() {
+    if (phVoiceIdx !== null) return phVoiceIdx;
+    phVoiceIdx = -1; phVoiceName = '';
+    try {
+        const tts = getCapacitorTTSPlugin();
+        if (tts && typeof tts.getSupportedVoices === 'function') {
+            const r = await tts.getSupportedVoices();
+            const gb = (r.voices || []).map((v, i) => ({ v, i }))
+                .filter(o => (o.v.lang || '').replace('_', '-').toLowerCase() === 'en-gb');
+            const pref = ['daniel', 'serena', 'kate', 'arthur', 'oliver', 'martha'];
+            const best = gb.find(o => pref.some(n => (o.v.name || '').toLowerCase().includes(n))) || gb[0];
+            if (best) { phVoiceIdx = best.i; phVoiceName = best.v.name; }
+        }
+    } catch (e) { console.warn('pickBritishVoice failed', e); }
+    let info = document.getElementById('ph-voice-info');
+    if (info) info.innerText = phVoiceName ? ('🇬🇧 語音：' + phVoiceName) : '⚠️ 搵唔到英式語音，用緊預設語音';
+    return phVoiceIdx;
+}
+function speakPh(w) {
+    if (!w) return;
+    pickBritishVoice().then(idx => speakText(w, 'en-GB', null,
+        { rate: 0.8, capVoiceIndex: idx >= 0 ? idx : undefined }));
+}
 
 function showPhCard(auto) {
     let w = phWords[phCard], card = document.getElementById('ph-bigcard');
@@ -1648,7 +1673,7 @@ function goPhList() {
 }
 
 function openPhonics(stage) {
-    closePhList();
+    closePhList(); pickBritishVoice();
     phStage = stage;
     phWords = stage ? PHONICS[stage].words.slice() : [].concat(...Object.values(PHONICS).map(x => x.words));
     document.getElementById('phonics-title').innerText = stage ? PHONICS[stage].name : 'Stage 1-4 全部';
