@@ -10,7 +10,7 @@
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
     "@capacitor-community/text-to-speech": "^8.0.2",
-    "@capacitor-community/admob": "^8.0.0"
+    "cordova-plugin-purchase": "^13.10.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0"
