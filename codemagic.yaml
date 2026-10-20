@@ -53,7 +53,7 @@ workflows:
       - name: Verify no ad SDK is linked (stops the build early if one is)
         script: |
           cd "$IOS_PROJECT_DIR"
-          if grep -r -i -l -E "Google-Mobile-Ads|GoogleMobileAds|CapacitorCommunityAdmob" Podfile Podfile.lock App.xcodeproj/project.pbxproj 2>/dev/null; then
+          if grep -r -i -l -E "Google-Mobile-Ads|GoogleMobileAds|CapacitorCommunityAdmob" Podfile Podfile.lock App.xcodeproj/project.pbxproj App/AppDelegate.swift 2>/dev/null; then
             echo "ERROR: an ad SDK is still referenced in the files listed above"; exit 1
           fi
           echo "OK: no ad SDK referenced"
