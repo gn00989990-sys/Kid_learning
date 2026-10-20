@@ -826,6 +826,14 @@
         .ph-nav2 { display:flex; justify-content:center; gap:16px; margin:14px 0; }
         .ph-nav2 button { min-width:130px; height:56px; font-size:22px; font-weight:700; border:none; border-radius:28px; background:#7e57c2; color:#fff; box-shadow:0 4px 8px rgba(0,0,0,.2); }
         .ph-nav2 button:active { transform:scale(.95); }
+        .kl-modal { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55); padding:16px; box-sizing:border-box; }
+        .kl-box { background:#fffdf7; border-radius:24px; padding:22px 18px; width:min(420px,100%); text-align:center; box-shadow:0 10px 30px rgba(0,0,0,.35); max-height:90vh; overflow:auto; }
+        .kl-text { font-size:17px; line-height:1.7; color:#444; text-align:left; margin:8px auto 14px; display:inline-block; }
+        .kl-btn { display:block; width:100%; box-sizing:border-box; margin:8px 0; padding:14px; font-size:20px; font-weight:700; color:#fff; border:none; border-radius:30px; background:#43a047; cursor:pointer; }
+        .kl-btn.alt { background:#7e57c2; }
+        .kl-link { margin-top:6px; background:none; border:none; color:#888; font-size:16px; padding:10px; }
+        .lock-badge { position:absolute; top:8px; right:10px; font-size:24px; }
+        .dialogue-topic-card { position:relative; }
 </style>
 </head>
 <body>
@@ -854,6 +862,7 @@ function phImgNext(img) {
         <button class="home-button" id="phonics-btn" onclick="showPage('phonics-stage-page')">
             <img src="BG/phonics.PNG" alt="Phonics" data-alt="BG/phonics.png,BG/Phonics.PNG,BG/Phonics.png" onerror="phImgNext(this)">
         </button>
+        <button class="ph-stage-btn" id="unlock-home-btn" onclick="showPaywall()" style="margin-top:14px; width:min(240px,80vw);">🔓 解鎖全部 · 恢復購買</button>
     </div>
 
     <!-- 2. Topic Selection Page -->
@@ -876,6 +885,28 @@ function phImgNext(img) {
         <button class="return-btn" onclick="showPage('vocab-topics-page')">返回主題選單</button>
         <button class="quiz-launch-btn" id="start-quiz-btn">📝 開始小測驗</button>
         <div id="vocab-items" class="vocab-grid"></div>
+    </div>
+
+    <!-- 解鎖畫面 + 家長驗證 -->
+    <div id="pw-modal" class="kl-modal">
+        <div class="kl-box">
+            <div style="font-size:44px;">🔓</div>
+            <h2 style="margin:6px 0;">解鎖全部內容</h2>
+            <p class="kl-text">一次過購買，永久使用：<br>• 全部生字主題<br>• 全部開口講英文主題<br>• 無限次小測驗<br>• Phonics Stage 3 · 4 同「全部」</p>
+            <button id="pw-buy" class="kl-btn" onclick="onBuyTapped()">🔓 HK$8 一次過解鎖全部</button>
+            <button class="kl-btn alt" onclick="restoreBuy()">↩️ 恢復購買</button>
+            <button class="kl-link" onclick="closePaywall()">稍後再說</button>
+        </div>
+    </div>
+    <div id="pg-modal" class="kl-modal" style="z-index:110;">
+        <div class="kl-box">
+            <div style="font-size:40px;">🔒</div>
+            <h2 style="margin:6px 0;">家長驗證</h2>
+            <p class="kl-text">請由家長回答：</p>
+            <div id="pg-q" style="font-size:34px; font-weight:800; margin:6px 0 12px;"></div>
+            <div id="pg-opts" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+            <button class="kl-link" onclick="closeParentalGate()">取消</button>
+        </div>
     </div>
 
     <!-- Phonics stage select -->
@@ -1408,13 +1439,6 @@ function showPage(pageId) {
     let helpBtn = document.getElementById('mandarin-help-btn');
     if (helpBtn) helpBtn.style.display = (pageId === 'vocab-display-page') ? 'block' : 'none';
 
-    // Banner 廣告淨係喺主頁同生字瀏覽頁顯示，測驗同對話練習期間隱藏，
-    // 減少滋擾小朋友專心學習
-    if (pageId === 'home-page' || pageId === 'vocab-topics-page' || pageId === 'vocab-display-page') {
-        showBannerAd();
-    } else {
-        hideBannerAd();
-    }
 
     // 離開頁面時自動停止發音
     stopSpeaking();
@@ -1435,6 +1459,7 @@ document.querySelectorAll('.topic-button').forEach((button) => {
         'family-btn': 'Family', 'vegetables-btn': 'Vegetables', 'weather-btn': 'Weather'
     };
     let chosenTopic = topicMap[e.target.id];
+    if (!canOpenVocab(chosenTopic)) return;
     currentTopic = chosenTopic;
     document.getElementById('current-topic-title').innerText = chosenTopic;
     displayVocabItems(chosenTopic);
@@ -1448,7 +1473,7 @@ function renderDialogueTopics() {
   let container = document.getElementById('dialogue-topics');
   container.innerHTML = '';
 
-  dialogue.forEach((d) => {
+  dialogue.forEach((d, idx) => {
     // 標題開頭係 emoji，之後先係文字，例如 '🍽️ Breakfast Time'
     let firstSpace = d.title.indexOf(' ');
     let emoji = firstSpace > -1 ? d.title.slice(0, firstSpace) : '💬';
@@ -1482,8 +1507,12 @@ function renderDialogueTopics() {
 
     card.appendChild(thumb);
     card.appendChild(label);
+    if (!isUnlocked() && !(idx < FREE_DIALOGUE_COUNT)) {
+      let lk = document.createElement('span'); lk.className = 'lock-badge'; lk.innerText = '🔒'; card.appendChild(lk);
+    }
 
     card.addEventListener('click', () => {
+      if (!canOpenDialogue(idx)) return;
       stopSpeaking(); // 切換主題時，停止正在播放嘅語音
       dialoguePlayToken++;
       showPage('dialogue-detail-page');
@@ -1681,6 +1710,7 @@ function goPhList() {
 }
 
 function openPhonics(stage) {
+    if (!canOpenPhonics(stage)) return;
     closePhList(); pickBritishVoice();
     phStage = stage;
     phWords = stage ? PHONICS[stage].words.slice() : [].concat(...Object.values(PHONICS).map(x => x.words));
@@ -1710,8 +1740,6 @@ function nextSpell() {
         document.getElementById('ph-full-sticker').style.display = full ? 'block' : 'none';
         document.getElementById('ph-result-emoji').innerText = full ? '🏆' : (score >= total * 0.67 ? '🎉' : '💪');
         if (full) playFanfareSound();
-        // 拼寫完成後顯示一次插頁廣告 (同一輪淨係出一次，Back/Next 返嚟唔會重複)
-        if (!phAdShown) { phAdShown = true; showInterstitialAd(); }
         return;
     }
     document.getElementById('ph-play').style.display = 'block';
@@ -1751,93 +1779,121 @@ function peekPh() {
     phTimer = setTimeout(() => { if (phPos < phOrder[phIdx].length) h.innerText = ''; }, 2000);
 }
 
-// ===== AdMob (banner + interstitial) =====
-// 廣告單元 ID 對應 AdMob 入面已經同呢個 App Store listing 連接好嘅 App 記錄
-const AD_UNIT_BANNER = 'ca-app-pub-2149260055615094/6069577684';
-const AD_UNIT_INTERSTITIAL = 'ca-app-pub-2149260055615094/8751581342';
+// ===== 內購：一次過解鎖全部 (HK$8) =====
+// 免費：生字 3 個主題、開口講英文 3 個主題、小測驗 1 次、Phonics Stage 1-2
+var IAP_PRODUCT_ID = 'com.fafa.kidlearning.unlockall';   // 要同 App Store Connect 建立嘅產品 ID 一模一樣
+var FREE_VOCAB = ['Fruits', 'Animals', 'Transports'];
+var FREE_DIALOGUE_COUNT = 3;
+var FREE_PHONICS = [1, 2];
+var iapInitTried = false;
 
-// 開發/測試階段設 true，用 Google 測試廣告，唔會撞政策問題；
-// 準備正式出街嗰陣記得改返 false
-const AD_TESTING_MODE = false;
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
-let admobReady = false;
-let interstitialLoaded = false;
+function isUnlocked() {
+    if (lsGet('kl_unlocked') === '1') return true;
+    try {
+        if (window.CdvPurchase && CdvPurchase.store.owned(IAP_PRODUCT_ID)) { lsSet('kl_unlocked', '1'); return true; }
+    } catch (e) {}
+    return false;
+}
+function setUnlocked() { lsSet('kl_unlocked', '1'); refreshLocks(); }
 
-function getAdMobPlugin() {
-    return window.Capacitor?.Plugins?.AdMob || null;
+function canOpenVocab(t) { if (isUnlocked() || FREE_VOCAB.indexOf(t) >= 0) return true; showPaywall(); return false; }
+function canOpenDialogue(i) { if (isUnlocked() || i < FREE_DIALOGUE_COUNT) return true; showPaywall(); return false; }
+function canOpenPhonics(s) { if (isUnlocked() || FREE_PHONICS.indexOf(s) >= 0) return true; showPaywall(); return false; }
+function useQuizAllowance() {          // 小測驗：免費 1 次 (一開始就計)
+    if (isUnlocked()) return true;
+    if (lsGet('kl_quiz_used') !== '1') { lsSet('kl_quiz_used', '1'); return true; }
+    showPaywall(); return false;
 }
 
-async function initAdMob() {
-    const AdMob = getAdMobPlugin();
-    if (!AdMob) return; // 瀏覽器入面冇呢個原生插件，正常，唔顯示廣告
+function refreshLocks() {
+    var un = isUnlocked();
+    var vmap = { 'fruits-btn': 'Fruits', 'animals-btn': 'Animals', 'transports-btn': 'Transports',
+                 'family-btn': 'Family', 'vegetables-btn': 'Vegetables', 'weather-btn': 'Weather' };
+    Object.keys(vmap).forEach(function (id) {
+        var b = document.getElementById(id); if (!b) return;
+        if (b.dataset.orig === undefined) b.dataset.orig = b.innerText;
+        b.innerText = b.dataset.orig + ((!un && FREE_VOCAB.indexOf(vmap[id]) < 0) ? ' 🔒' : '');
+    });
+    document.querySelectorAll('#phonics-stage-page .ph-stage-btn').forEach(function (b, i) {
+        var stage = i < 4 ? i + 1 : 0;
+        if (b.dataset.orig === undefined) b.dataset.orig = b.innerText;
+        b.innerText = b.dataset.orig + ((!un && FREE_PHONICS.indexOf(stage) < 0) ? ' 🔒' : '');
+    });
+    var hb = document.getElementById('unlock-home-btn'); if (hb) hb.style.display = un ? 'none' : 'block';
+    renderDialogueTopics();
+}
+
+// ---- 家長驗證 (Kids Category 要求：購買前要家長確認) ----
+function parentalGate(onPass) {
+    var a = 6 + Math.floor(Math.random() * 4), b = 6 + Math.floor(Math.random() * 4), ans = a * b;
+    var opts = [ans];
+    while (opts.length < 4) { var d = ans + (Math.floor(Math.random() * 13) - 6); if (d > 0 && opts.indexOf(d) < 0) opts.push(d); }
+    phShuffle(opts);
+    document.getElementById('pg-q').innerText = a + ' × ' + b + ' = ?';
+    var box = document.getElementById('pg-opts'); box.innerHTML = '';
+    opts.forEach(function (o) {
+        var btn = document.createElement('button'); btn.className = 'kl-btn alt'; btn.innerText = o;
+        btn.onclick = function () {
+            if (o === ans) { closeParentalGate(); onPass(); }
+            else { btn.disabled = true; btn.style.opacity = .35; }
+        };
+        box.appendChild(btn);
+    });
+    document.getElementById('pg-modal').style.display = 'flex';
+}
+function closeParentalGate() { document.getElementById('pg-modal').style.display = 'none'; }
+
+// ---- 解鎖畫面 ----
+function showPaywall() { updatePaywallPrice(); document.getElementById('pw-modal').style.display = 'flex'; }
+function closePaywall() { document.getElementById('pw-modal').style.display = 'none'; }
+function updatePaywallPrice() {
+    var price = 'HK$8';
+    try { var p = CdvPurchase.store.get(IAP_PRODUCT_ID); if (p && p.pricing && p.pricing.price) price = p.pricing.price; } catch (e) {}
+    var el = document.getElementById('pw-buy'); if (el) el.innerText = '🔓 ' + price + ' 一次過解鎖全部';
+}
+function onBuyTapped() { parentalGate(buyUnlock); }
+function buyUnlock() {
+    if (!window.CdvPurchase) { alert('請喺 iPhone / iPad 嘅 App 入面購買。'); return; }
     try {
-        await AdMob.initialize({
-            initializeForTesting: AD_TESTING_MODE,
-            tagForChildDirectedTreatment: true,
-            maxAdContentRating: 'G'
+        var offer = CdvPurchase.store.get(IAP_PRODUCT_ID) && CdvPurchase.store.get(IAP_PRODUCT_ID).getOffer();
+        if (!offer) { alert('暫時未能連接 App Store，請稍後再試。'); return; }
+        CdvPurchase.store.order(offer).then(function (err) {
+            if (err && err.code !== (CdvPurchase.ErrorCode && CdvPurchase.ErrorCode.PAYMENT_CANCELLED)) alert('購買未能完成，請稍後再試。');
         });
-        admobReady = true;
-        prepareInterstitial();
-    } catch (e) {
-        console.warn('AdMob initialize failed', e);
-    }
+    } catch (e) { alert('購買未能完成，請稍後再試。'); }
 }
-initAdMob();
-
-async function showBannerAd() {
-    const AdMob = getAdMobPlugin();
-    if (!AdMob || !admobReady) return;
-    try {
-        await AdMob.showBanner({
-            adId: AD_UNIT_BANNER,
-            adSize: 'BANNER',
-            position: 'BOTTOM_CENTER',
-            margin: 0,
-            isTesting: AD_TESTING_MODE
-        });
-    } catch (e) {
-        console.warn('showBanner failed', e);
-    }
+function restoreBuy() {
+    if (!window.CdvPurchase) { alert('請喺 iPhone / iPad 嘅 App 入面恢復購買。'); return; }
+    CdvPurchase.store.restorePurchases().then(function () {
+        setTimeout(function () {
+            if (isUnlocked()) { alert('已恢復購買 ✅'); closePaywall(); }
+            else alert('找不到之前嘅購買記錄。');
+        }, 1500);
+    });
 }
 
-async function hideBannerAd() {
-    const AdMob = getAdMobPlugin();
-    if (!AdMob || !admobReady) return;
+function initIAP() {
+    if (iapInitTried || !window.CdvPurchase) return;
+    iapInitTried = true;
     try {
-        await AdMob.hideBanner();
-    } catch (e) {
-        // 未顯示過banner都可能會報錯，唔理佢
-    }
+        var store = CdvPurchase.store, Platform = CdvPurchase.Platform, ProductType = CdvPurchase.ProductType;
+        store.register([{ id: IAP_PRODUCT_ID, type: ProductType.NON_CONSUMABLE, platform: Platform.APPLE_APPSTORE }]);
+        store.when()
+            .productUpdated(function () { if (store.owned(IAP_PRODUCT_ID)) { setUnlocked(); closePaywall(); } updatePaywallPrice(); })
+            .approved(function (t) { t.finish(); })
+            .finished(function (t) {
+                if (t.products && t.products.some(function (p) { return p.id === IAP_PRODUCT_ID; })) { setUnlocked(); closePaywall(); }
+            });
+        store.error(function (e) { console.warn('IAP error', e); });
+        store.initialize([Platform.APPLE_APPSTORE]).then(updatePaywallPrice);
+    } catch (e) { console.warn('initIAP failed', e); }
 }
-
-async function prepareInterstitial() {
-    const AdMob = getAdMobPlugin();
-    if (!AdMob || !admobReady) return;
-    try {
-        await AdMob.prepareInterstitial({
-            adId: AD_UNIT_INTERSTITIAL,
-            isTesting: AD_TESTING_MODE
-        });
-        interstitialLoaded = true;
-    } catch (e) {
-        console.warn('prepareInterstitial failed', e);
-        interstitialLoaded = false;
-    }
-}
-
-async function showInterstitialAd() {
-    const AdMob = getAdMobPlugin();
-    if (!AdMob || !admobReady || !interstitialLoaded) return;
-    try {
-        await AdMob.showInterstitial();
-    } catch (e) {
-        console.warn('showInterstitial failed', e);
-    } finally {
-        // 用完即刻準備下一個，等下次測驗完成都有得用
-        interstitialLoaded = false;
-        prepareInterstitial();
-    }
-}
+document.addEventListener('deviceready', initIAP, false);
+window.addEventListener('load', function () { setTimeout(initIAP, 1500); });
+refreshLocks();
 
 function loadDialogueVoices() {
     let voices = window.speechSynthesis.getVoices() || [];
@@ -2510,6 +2566,7 @@ function buildQuizPool(topic) {
 }
 
 function startQuiz(topic) {
+    if (!useQuizAllowance()) return;
     let pool = buildQuizPool(topic);
     let sixQuestions = shuffleArray(pool).slice(0, 6);
 
@@ -2674,8 +2731,6 @@ function showQuizResult() {
         resultEmoji.innerText = score >= 4 ? '🎉' : '💪';
     }
 
-    // 完成測驗後顯示一次插頁廣告 (若準備好嘅話)
-    showInterstitialAd();
 }
 
 document.getElementById('quiz-retry-btn').addEventListener('click', () => {
@@ -2771,6 +2826,7 @@ document.getElementById('listening-quiz-btn').addEventListener('click', () => st
 document.getElementById('reading-quiz-btn').addEventListener('click', () => startMixedQuiz('reading'));
 
 function startMixedQuiz(type) {
+    if (!useQuizAllowance()) return;
     let questions = buildMixedQuizQuestions(8);
 
     mixedQuizSession = {
@@ -2953,8 +3009,6 @@ function showMixedQuizResult() {
         resultEmoji.innerText = score >= 5 ? '🎉' : '💪';
     }
 
-    // 完成混合測驗後顯示一次插頁廣告 (若準備好嘅話)
-    showInterstitialAd();
 }
 
 document.getElementById('mixed-quiz-retry-btn').addEventListener('click', () => {
