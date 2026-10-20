@@ -85,4 +85,4 @@ workflows:
           failure: false
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
+        submit_to_testflight: false   # internal TestFlight needs no beta review; true needs Test Information filled in
