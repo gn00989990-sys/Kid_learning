@@ -862,7 +862,6 @@ function phImgNext(img) {
         <button class="home-button" id="phonics-btn" onclick="showPage('phonics-stage-page')">
             <img src="BG/phonics.PNG" alt="Phonics" data-alt="BG/phonics.png,BG/Phonics.PNG,BG/Phonics.png" onerror="phImgNext(this)">
         </button>
-        <button class="ph-stage-btn" id="unlock-home-btn" onclick="showPaywall()" style="margin-top:14px; width:min(240px,80vw);">🔓 解鎖全部 · 恢復購買</button>
     </div>
 
     <!-- 2. Topic Selection Page -->
@@ -1822,7 +1821,6 @@ function refreshLocks() {
         if (b.dataset.orig === undefined) b.dataset.orig = b.innerText;
         b.innerText = b.dataset.orig + ((!un && FREE_PHONICS.indexOf(stage) < 0) ? ' 🔒' : '');
     });
-    var hb = document.getElementById('unlock-home-btn'); if (hb) hb.style.display = un ? 'none' : 'block';
     renderDialogueTopics();
 }
 
